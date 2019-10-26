@@ -19,23 +19,26 @@ const stdoutColor = require('supports-color').stdout;
     `)
 })
 
-test.skip('simplifies babel lazy import block', async () => {
+test('simplifies babel lazy import block', async () => {
   const input = `
-function _template() {
-  const data = _interopRequireDefault(require("@babel/template"));
+function _parser() {
+  const data = require("@babel/parser");
 
-  _template = function () {
+  _parser = function () {
     return data;
   };
 
   return data;
 }
 
-console.log(_template().default)
+console.log(_parser().tokTypes)
 `
 
   const transformed = await transform(input)
-  console.log(transformed)
+  expect(transformed).toMatchInlineSnapshot(`
+    "import { tokTypes } from \\"@babel/parser\\";
+    console.log(tokTypes);"
+  `)
 })
 
 describe('handle named imports', () => {

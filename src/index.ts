@@ -7,6 +7,7 @@ import { handleWildcardImport } from './imports/handleWildcardImport'
 import { pathsToRemove, isTopLevel } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
+import { handlePotentialLazyImportFunction } from './handlePotentialLazyImportFunction'
 
 /**
  * NodePath of:
@@ -82,6 +83,18 @@ export default declare(api => {
         } else if (path.node.name === 'global') {
           path.replaceWith(t.identifier('window'))
         }
+      },
+
+      FunctionDeclaration(path) {
+        // Handle transforming babel lazy import blocks:
+        // function _parser() {
+        //   const data = require("@babel/parser");
+        //   _parser = function () {
+        //     return data;
+        //   };
+        //   return data;
+        // }
+        handlePotentialLazyImportFunction(path)
       },
 
       AssignmentExpression(path) {

@@ -58,7 +58,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const newDefaultId = generateIdentifier(globalScope, originalId.name)
 
   if (usesDefaultImport) {
-    // rename all instances of foo.bar and foo to _foo.bar and _foo
+    // rename all instances of foo.bar to _foo.bar foo to _foo
     binding.referencePaths.forEach(referencePath => {
       // I think this should always be true afaik but just to make sure
       if (
@@ -94,6 +94,6 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
         ),
     importString,
   )
-  injectImport(path, newImport)
   path.parentPath.remove()
+  injectImport(path, newImport)
 }
