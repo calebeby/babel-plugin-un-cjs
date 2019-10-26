@@ -115,47 +115,15 @@ test('babel-highlight', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {};
-    import _data2 from \\"chalk\\";
-    import _data from \\"esutils\\";
-    import * as data from \\"js-tokens\\";
+    import _chalk from \\"chalk\\";
+    import _esutils from \\"esutils\\";
+    import * as _jsTokens from \\"js-tokens\\";
     export { shouldHighlight };
     _default.shouldHighlight = shouldHighlight;
     export { getChalk };
     _default.getChalk = getChalk;
     export { highlight as default };
     _default.default = highlight;
-
-    function _jsTokens() {
-      _jsTokens = function () {
-        return data;
-      };
-
-      return data;
-    }
-
-    function _esutils() {
-      _esutils = function () {
-        return {
-          default: _data
-        };
-      };
-
-      return {
-        default: _data
-      };
-    }
-
-    function _chalk() {
-      _chalk = function () {
-        return {
-          default: _data2
-        };
-      };
-
-      return {
-        default: _data2
-      };
-    }
 
     function _interopRequireDefault(obj) {
       return obj && obj.__esModule ? obj : {
@@ -205,24 +173,24 @@ test('babel-highlight', async () => {
     function getTokenType(match) {
       const [offset, text] = match.slice(-2);
 
-      _jsTokens().matchToToken(match);
+      _jsTokens.matchToToken(match);
 
-      console.log(_esutils().default.keyword);
+      console.log(_esutils.keyword);
     }
 
     function highlightTokens(defs, text) {
-      return _jsTokens().default;
+      return _jsTokens.default;
     }
 
     function shouldHighlight(options) {
-      return _chalk().default.supportsColor || options.forceColor;
+      return _chalk.supportsColor || options.forceColor;
     }
 
     function getChalk(options) {
-      let chalk = _chalk().default;
+      let chalk = _chalk;
 
       if (options.forceColor) {
-        chalk = new (_chalk().default.constructor)({
+        chalk = new _chalk.constructor({
           enabled: true,
           level: 1
         });
