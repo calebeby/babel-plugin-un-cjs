@@ -125,9 +125,8 @@ export const handlePotentialExport = (
     right.node.object.name === 'exports' &&
     t.isIdentifier(right.node.property) &&
     right.node.property.name === 'default'
-  ) {
+  )
     return path.remove()
-  }
 
   const exportInfo = getExportInfo(left)
   // this means that the assignment has no references to module.exports or exports

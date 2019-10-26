@@ -4,14 +4,28 @@ import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
 import { handleNamedImport } from './imports/handleNamedImport'
 import { handleWildcardImport } from './imports/handleWildcardImport'
-import { pathsToRemove, everyParent } from './helpers'
+import { pathsToRemove, isTopLevel } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 
-export type NamedExportsMap = Map<
-  string,
-  NodePath<t.AssignmentExpression | t.ObjectProperty>
->
+/**
+ * NodePath of:
+ * - `AssignmentExpression`:
+ *   - `module.exports.foo = 'bar'`
+ *   - `exports.foo = 'bar'`
+ * - `ObjectProperty` (within `module.exports = {}`):
+ *   - `foo: 'bar'`
+ * - `CallExpression`:
+ *   - `Object.defineProperty(module.exports, 'foo', {
+ *       get: function () { return 'bar' }
+ *     })`
+ */
+export type ExportPath =
+  | NodePath<t.AssignmentExpression>
+  | NodePath<t.ObjectProperty>
+  | NodePath<t.CallExpression>
+
+export type NamedExportsMap = Map<string, ExportPath>
 export type ModulePathsToReplace = Set<
   NodePath<t.Identifier | t.MemberExpression>
 >
@@ -45,11 +59,17 @@ export default declare(api => {
 
       CallExpression(path) {
         const { node } = path
-        handlePotentialObjectDefineProperty(path)
+        handlePotentialObjectDefineProperty(path, namedExports)
         if (!t.isIdentifier(node.callee)) return
-        if (node.callee.name.match(/interopRequireDefault/)) {
+        if (
+          node.callee.name.match(/interopRequireDefault/) ||
+          node.callee.name === '__importDefault'
+        ) {
           handleDefaultImport(path)
-        } else if (node.callee.name.match(/interopRequireWildcard/)) {
+        } else if (
+          node.callee.name.match(/interopRequireWildcard/) ||
+          node.callee.name === '__importStar'
+        ) {
           handleWildcardImport(path)
         } else if (node.callee.name === 'require') {
           handleNamedImport(path)
@@ -70,20 +90,8 @@ export default declare(api => {
         if (bail) return
 
         // We must bail if there is a non-static export
-        const isTopLevel =
-          t.isProgram(path.parentPath.parent) ||
-          everyParent(
-            path,
-            p =>
-              // workaround to allow for: const foo = module.exports = 'asdf'
-              (p.isProgram() ||
-                p.isAssignmentExpression() ||
-                p.isVariableDeclaration() ||
-                p.isVariableDeclarator()) &&
-              p.parentKey !== 'right',
-          )
 
-        if (!isTopLevel) {
+        if (!isTopLevel(path)) {
           // assignment that is not in the top-level program
           // we want to see if module.exports or exports is modified
           // if it is, we bail on all exports modifications in this file

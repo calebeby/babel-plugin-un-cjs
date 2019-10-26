@@ -20,7 +20,14 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
   if (!binding) return
   const programPath = getProgramPath(path)
   const globalScope = path.scope.getProgramParent()
-  const newImportId = generateIdentifier(globalScope, varName)
+  const globalBinding = globalScope.getBinding(parent.id.name)
+  // because we are moving the variable to the global scope, it may conflict
+  // it is safe to use the original name if the declaration of the variable is in the global scope already and it is const
+  const useOriginalName =
+    globalBinding && globalBinding.path === varPath && globalBinding.constant
+  const newImportId = useOriginalName
+    ? parent.id
+    : generateIdentifier(globalScope, varName)
   const newImport = t.importDeclaration(
     [t.importDefaultSpecifier(newImportId)],
     t.stringLiteral(importPath),

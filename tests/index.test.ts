@@ -1,24 +1,5 @@
 import transform from './test-util'
 
-test('require for side effects', async () => {
-  const input = `
-require('asdf')
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`"import \\"asdf\\";"`)
-})
-
-test('require("asdf").foo', async () => {
-  const input = `
-const stdoutColor = require('supports-color').stdout;
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`
-        "import { stdout } from \\"supports-color\\";
-        const stdoutColor = stdout;"
-    `)
-})
-
 test.todo('destructured require')
 
 test('replaces global with window', async () => {
@@ -39,39 +20,26 @@ test('removes __esModule', async () => {
   expect(transformed).toMatchInlineSnapshot(`""`)
 })
 
-describe('handle named imports', () => {
-  test('actually default import', async () => {
-    const input = `
-const foo = require('bar')
-foo.bar()
-foo()
-`
-    const transformed = await transform(input)
-    expect(transformed).toMatchInlineSnapshot(`
-            "import _foo from \\"bar\\";
-
-            _foo.bar();
-
-            _foo();"
-        `)
-  })
-
-  test('named imports', async () => {
-    const input = `
-const foo = require('bar')
-foo.bar()
-foo.baz()
-`
-    const transformed = await transform(input)
-    expect(transformed).toMatchInlineSnapshot(`
-            "import { bar, baz } from \\"bar\\";
-            bar();
-            baz();"
-        `)
-  })
-})
-
 describe('handle export object', () => {
+  test('handles Object.defineProperty on exports', async () => {
+    const input = `
+var _package = require("../package.json");
+Object.defineProperty(exports, "version", {
+  enumerable: true,
+  get: function () {
+    return _package.version;
+  }
+});
+  `
+    const transformed = await transform(input)
+    expect(transformed).toMatchInlineSnapshot(`
+      "let _default = {};
+      import { version } from \\"../package.json\\";
+      export { version };
+      _default.version = version;
+      export default _default;"
+    `)
+  })
   describe('handles objects', () => {
     test('export property on object', async () => {
       const input = `

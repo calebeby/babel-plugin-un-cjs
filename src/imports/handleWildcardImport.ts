@@ -17,9 +17,18 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   pathsToRemove.add(varPath)
   const varScope = path.scope
   const globalScope = varScope.getProgramParent()
+  const globalBinding = globalScope.getBinding(parent.id.name)
   // because we are moving the variable to the global scope, it may conflict
-  const newId = generateIdentifier(globalScope, parent.id.name)
-  varScope.rename(parent.id.name, newId.name)
+  // it is safe to use the original name if the declaration of the variable is in the global scope already and it is const
+  const useOriginalName =
+    globalBinding && globalBinding.path === varPath && globalBinding.constant
+  const newId = useOriginalName
+    ? parent.id
+    : generateIdentifier(globalScope, parent.id.name)
+  if (!useOriginalName) {
+    varScope.rename(parent.id.name, newId.name)
+    globalScope.removeBinding(parent.id.name)
+  }
   const importNodePath: NodePath<t.ImportDeclaration> = getProgramBody(
     path,
   ).insertBefore([

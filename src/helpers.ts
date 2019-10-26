@@ -65,3 +65,16 @@ export const isModuleExports = (node: t.MemberExpression): boolean =>
   node.object.name === 'module' &&
   t.isIdentifier(node.property) &&
   node.property.name === 'exports'
+
+export const isTopLevel = (path: NodePath) =>
+  t.isProgram(path.parentPath.parent) ||
+  everyParent(
+    path,
+    p =>
+      // workaround to allow for: const foo = module.exports = 'asdf'
+      (p.isProgram() ||
+        p.isAssignmentExpression() ||
+        p.isVariableDeclaration() ||
+        p.isVariableDeclarator()) &&
+      p.parentKey !== 'right',
+  )
