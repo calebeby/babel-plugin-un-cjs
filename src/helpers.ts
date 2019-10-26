@@ -25,7 +25,7 @@ export const getProgramPath = (path: NodePath<unknown>) =>
 export const getProgramBody = (path: NodePath<unknown>) =>
   getProgramPath(path).get('body.0') as NodePath<t.Node>
 
-const reserved = ['default']
+const reserved = ['default', 'super', 'import']
 
 export const generateIdentifier = (scope: Scope, name: string) =>
   scope.hasBinding(name) || reserved.includes(name)
