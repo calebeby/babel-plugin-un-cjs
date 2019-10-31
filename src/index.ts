@@ -46,8 +46,6 @@ export default declare(api => {
           if (!bail) {
             Array.from(pathsToRemove.values()).forEach(p => p.remove())
             writeExports(programPath, modulePathsToReplace, namedExports)
-          } else {
-            console.log('bail', programPath.hub.file.opts.filename)
           }
 
           // reset state
