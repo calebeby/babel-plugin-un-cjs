@@ -19,7 +19,7 @@ function Super(...args) {
 }
 `
 
-test('babel-highlight', async () => {
+test('babel-types', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "\\"use strict\\";
