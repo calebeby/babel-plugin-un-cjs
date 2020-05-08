@@ -131,3 +131,73 @@ module.exports = main
     })
   })
 })
+
+test('export * from', async () => {
+  // babel output of export * from
+  const input = `
+var _waitFor = require("./wait-for");
+
+Object.keys(_waitFor).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _waitFor[key];
+    }
+  });
+});
+`
+  const transformed = await transform(input)
+  expect(transformed).toMatchInlineSnapshot(`
+    "let _default = {};
+    export * from \\"./wait-for\\";
+    export default _default;"
+  `)
+})
+
+test('export * from, without _exportNames', async () => {
+  // babel output of export * from
+  const input = `
+var _waitFor = require("./wait-for");
+
+Object.keys(_waitFor).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _waitFor[key];
+    }
+  });
+});
+`
+  const transformed = await transform(input)
+  expect(transformed).toMatchInlineSnapshot(`
+    "let _default = {};
+    export * from \\"./wait-for\\";
+    export default _default;"
+  `)
+})
+
+test.skip('export * from, when also exported as named', async () => {
+  // babel output of export * from
+  const input = `
+var queryHelpers = _interopRequireWildcard(require("./query-helpers"));
+
+exports.queryHelpers = queryHelpers;
+Object.keys(queryHelpers).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return queryHelpers[key];
+    }
+  });
+});
+
+`
+  const transformed = await transform(input)
+  console.log(transformed)
+  // expect(transformed).toMatchInlineSnapshot()
+})
