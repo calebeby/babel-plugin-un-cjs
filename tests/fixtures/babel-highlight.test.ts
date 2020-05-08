@@ -115,9 +115,9 @@ test('babel-highlight', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {};
-    import _chalk from \\"chalk\\";
-    import _esutils from \\"esutils\\";
-    import * as _jsTokens from \\"js-tokens\\";
+    import _chalk from 'chalk';
+    import _esutils from 'esutils';
+    import * as _jsTokens from 'js-tokens';
     export { shouldHighlight };
     _default.shouldHighlight = shouldHighlight;
     export { getChalk };

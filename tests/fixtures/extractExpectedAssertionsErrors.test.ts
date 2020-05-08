@@ -49,8 +49,8 @@ exports.default = _default;
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default2 = {};
-    import { setState, getState } from \\"./jestMatchersObject\\";
-    import { EXPECTED_COLOR, pluralize, RECEIVED_COLOR } from \\"jest-matcher-utils\\";
+    import { setState, getState } from './jestMatchersObject';
+    import { EXPECTED_COLOR, pluralize, RECEIVED_COLOR } from 'jest-matcher-utils';
     _default2.default = void 0;
 
     const resetAssertionsLocalState = () => {

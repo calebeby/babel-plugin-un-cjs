@@ -16,7 +16,7 @@ export const getRequirePath = (requireStatement: t.Node) => {
   }
   const importPathArg = requireStatement.arguments[0]
   if (!t.isStringLiteral(importPathArg)) return
-  return importPathArg.value
+  return importPathArg
 }
 
 export const getProgramPath = (path: NodePath<unknown>) =>

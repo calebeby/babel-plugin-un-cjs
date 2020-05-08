@@ -37,10 +37,7 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   const importNodePath: NodePath<t.ImportDeclaration> = getProgramBody(
     path,
   ).insertBefore([
-    t.importDeclaration(
-      [t.importNamespaceSpecifier(newId)],
-      t.stringLiteral(importPath),
-    ),
+    t.importDeclaration([t.importNamespaceSpecifier(newId)], importPath),
   ])[0]
   globalScope.registerDeclaration(importNodePath)
 }

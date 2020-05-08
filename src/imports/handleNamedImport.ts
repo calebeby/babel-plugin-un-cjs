@@ -11,9 +11,8 @@ const injectImport = (path: NodePath, newImport: t.ImportDeclaration) => {
 
 export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const { node } = path
-  const importPath = getRequirePath(node)
-  if (!importPath) return
-  const importString = t.stringLiteral(importPath)
+  const importString = getRequirePath(node)
+  if (!importString) return
   if (path.parentPath.isMemberExpression()) {
     // handling const foo = require('asdf').foo
     const memberExp = path.parentPath
@@ -38,11 +37,32 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     return
   }
   if (!parentPath.isVariableDeclarator()) return
+  const variableDeclarator = parentPath
   // const foo = require('asdf')
-  const originalId = parentPath.node.id
-  if (!t.isIdentifier(originalId)) return
+  const originalId = variableDeclarator.get('id')
+  if (originalId.isObjectPattern()) {
+    // Handling:
+    // const { a, foo: bar } = require("....")
+    const importSpecifiers: t.ImportSpecifier[] = originalId.node.properties
+      .map(prop => {
+        // ignore rest/spread, can't do that
+        // Potentially in the future we can handle rest/spread with namespace import
+        if (!t.isObjectProperty(prop)) return
+        const local = prop.value
+        const imported = prop.key
+        if (!t.isIdentifier(local)) return
+        return t.importSpecifier(local, imported)
+      })
+      .filter((v): v is t.ImportSpecifier => t.isImportSpecifier(v))
+    const newImport = t.importDeclaration(importSpecifiers, importString)
+    injectImport(path, newImport)
+    path.parentPath.remove()
+    return
+  }
+  if (!originalId.isIdentifier()) return
+  const originalIdName = originalId.node.name
   const { scope } = path
-  const binding = scope.getBinding(originalId.name)
+  const binding = scope.getBinding(originalIdName)
   if (!binding) return
   let importIds = new Map<string, t.Identifier>()
 
@@ -55,7 +75,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const globalScope = scope.getProgramParent()
 
   /** New identifier for the top-level object */
-  const newDefaultId = generateIdentifier(globalScope, originalId.name)
+  const newDefaultId = generateIdentifier(globalScope, originalIdName)
 
   if (usesDefaultImport) {
     // rename all instances of foo.bar to _foo.bar foo to _foo
@@ -63,7 +83,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
       // I think this should always be true afaik but just to make sure
       if (
         t.isIdentifier(referencePath.node) &&
-        referencePath.node.name === originalId.name
+        referencePath.node.name === originalIdName
       )
         referencePath.replaceWith(newDefaultId)
     })

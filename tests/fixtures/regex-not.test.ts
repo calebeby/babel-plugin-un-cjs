@@ -26,8 +26,8 @@ module.exports = toRegex;
     "'use strict';
 
     let _default = {};
-    import _safe from \\"safe-regex\\";
-    import _extend from \\"extend-shallow\\";
+    import _safe from 'safe-regex';
+    import _extend from 'extend-shallow';
 
     function toRegex(pattern, options) {
       return new RegExp(toRegex.create(pattern, options));

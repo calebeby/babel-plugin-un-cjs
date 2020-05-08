@@ -30,7 +30,7 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
     : generateIdentifier(globalScope, varName)
   const newImport = t.importDeclaration(
     [t.importDefaultSpecifier(newImportId)],
-    t.stringLiteral(importPath),
+    importPath,
   )
   const newPath = getProgramBody(programPath).insertBefore([newImport])[0]
 

@@ -1,7 +1,5 @@
 import transform from './test-util'
 
-test.todo('destructured require')
-
 test('replaces global with window', async () => {
   const input = `
 console.log(global.asdf)
@@ -200,4 +198,14 @@ Object.keys(queryHelpers).forEach(function (key) {
   const transformed = await transform(input)
   console.log(transformed)
   // expect(transformed).toMatchInlineSnapshot()
+})
+
+test('destructured require', async () => {
+  const input = `
+const { docsUrl, foo: bar, default: utils } = require('../utilities');
+`
+  const transformed = await transform(input)
+  expect(transformed).toMatchInlineSnapshot(
+    `"import { docsUrl, foo as bar, default as utils } from '../utilities';"`,
+  )
 })

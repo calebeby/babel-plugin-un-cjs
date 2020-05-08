@@ -5,7 +5,7 @@ test('require for side effects', async () => {
 require('asdf')
 `
   const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`"import \\"asdf\\";"`)
+  expect(transformed).toMatchInlineSnapshot(`"import 'asdf';"`)
 })
 
 test('require("asdf").foo', async () => {
@@ -14,9 +14,9 @@ const stdoutColor = require('supports-color').stdout;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-        "import { stdout } from \\"supports-color\\";
-        const stdoutColor = stdout;"
-    `)
+    "import { stdout } from 'supports-color';
+    const stdoutColor = stdout;"
+  `)
 })
 
 test('simplifies babel lazy import block', async () => {
@@ -50,7 +50,7 @@ foo()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import _foo from \\"bar\\";
+      "import _foo from 'bar';
 
       _foo.bar();
 
@@ -66,7 +66,7 @@ foo.baz()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import { bar, baz } from \\"bar\\";
+      "import { bar, baz } from 'bar';
       bar();
       baz();"
     `)
