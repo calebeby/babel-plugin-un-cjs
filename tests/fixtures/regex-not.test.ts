@@ -25,7 +25,6 @@ module.exports = toRegex;
   expect(transformed).toMatchInlineSnapshot(`
     "'use strict';
 
-    let _default = {};
     import _safe from 'safe-regex';
     import _extend from 'extend-shallow';
 
@@ -41,7 +40,7 @@ module.exports = toRegex;
       return 'blah';
     };
     toRegex.create = create;
-    _default = toRegex;
+    let _default = toRegex;
     export default _default;"
   `)
 })

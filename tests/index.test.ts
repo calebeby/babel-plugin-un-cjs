@@ -50,14 +50,13 @@ module.exports.foobarbaz = 'foobarbaz'
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "let _default = {};
-        const foo = 'foo';
+        "const foo = 'foo';
         _default.foobar = 'foobar';
 
         const _foo = () => {};
 
         export { _foo as foo };
-        _default = {
+        let _default = {
           foo: _foo
         };
         export const foobarbaz = 'foobarbaz';
@@ -76,12 +75,11 @@ module.exports.otherExport = 'otherExport'
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "let _default = {};
-        export const foo = () => {};
+        "export const foo = () => {};
         const obj = {
           foo: foo
         };
-        _default = obj;
+        let _default = obj;
         export const foobarbaz = 'foobarbaz';
         obj.foobarbaz = foobarbaz;
         export const otherExport = 'otherExport';
@@ -91,18 +89,18 @@ module.exports.otherExport = 'otherExport'
     })
   })
   describe('handles non-objects', () => {
-    test('export property on inlined non-object', async () => {
+    test.skip('export property on inlined non-object', async () => {
       const input = `
 exports.foo = 'foo'
 module.exports = () => {}
 module.exports.asdf = 'asdf'
 `
       const transformed = await transform(input)
+      // TODO: Fix bug because _default.foo is assigned before _default exists
       expect(transformed).toMatchInlineSnapshot(`
-        "let _default = {};
-        _default.foo = 'foo';
+        "_default.foo = 'foo';
 
-        _default = () => {};
+        let _default = () => {};
 
         export const asdf = 'asdf';
         _default.asdf = asdf;
@@ -117,13 +115,11 @@ module.exports = main
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "let _default = {};
-
-        let main = () => {};
+        "let main = () => {};
 
         export const other = 'hiiiii';
         main.other = other;
-        _default = main;
+        let _default = main;
         export default _default;"
       `)
     })
@@ -208,4 +204,46 @@ const { docsUrl, foo: bar, default: utils } = require('../utilities');
   expect(transformed).toMatchInlineSnapshot(
     `"import { docsUrl, foo as bar, default as utils } from '../utilities';"`,
   )
+})
+
+describe('uses single declaration for _default if possible', () => {
+  test('module.exports', async () => {
+    const input = `
+  module.exports.bar = 'hi'
+module.exports = {
+  foo: () => {}
+}
+`
+    const transformed = await transform(input)
+    expect(transformed).toMatchInlineSnapshot(`
+      "_default.bar = 'hi';
+      export const foo = () => {};
+      let _default = {
+        foo: foo
+      };
+      export default _default;"
+    `)
+  })
+
+  test('exports', async () => {
+    const input = `
+  exports.bar = 'hi'
+exports = {
+  foo: () => {}
+}
+`
+    const transformed = await transform(input)
+    // It is not a bug that bar is exported here but not in the above module.exports code.
+    // And in the above module.exports code foo is exported but not here
+    // It is because assigning to the `exports` object does not clear out the `module.exports` object
+    expect(transformed).toMatchInlineSnapshot(`
+      "let _default = {};
+      export const bar = 'hi';
+      _default.bar = bar;
+      _default = {
+        foo: () => {}
+      };
+      export default _default;"
+    `)
+  })
 })

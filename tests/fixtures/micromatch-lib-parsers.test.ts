@@ -22,13 +22,12 @@ module.exports.sdf = function () {
 exports.asdf = nanomatch
 `
   expect(await transform(input)).toMatchInlineSnapshot(`
-    "let _default = {};
-    import _toRegex from 'to-regex';
+    "import _toRegex from 'to-regex';
     import { create } from 'regex-not';
     import _nanomatch from 'nanomatch';
     import { parsers } from 'extglob';
 
-    _default = function (snapdragon) {
+    let _default = function (snapdragon) {
       console.log('nanomatch', _nanomatch.parsers);
       console.log('extglob', parsers);
     };

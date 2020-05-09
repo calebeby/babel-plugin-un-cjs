@@ -4,7 +4,7 @@ import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
 import { handleNamedImport } from './imports/handleNamedImport'
 import { handleWildcardImport } from './imports/handleWildcardImport'
-import { pathsToRemove, isTopLevel } from './helpers'
+import { pathsToRemove, isTopLevel, isModuleExports } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 import { handlePotentialLazyImportFunction } from './handlePotentialLazyImportFunction'
@@ -91,7 +91,13 @@ export default declare(api => {
 
     Identifier(path) {
       if (path.node.name === 'exports') {
-        modulePathsToReplace.add(path)
+        const parent = path.parentPath
+        // If the parent is module.exports, use that instead of just exports
+        if (parent.isMemberExpression() && isModuleExports(parent.node)) {
+          modulePathsToReplace.add(parent)
+        } else {
+          modulePathsToReplace.add(path)
+        }
       } else if (path.node.name === 'global') {
         path.replaceWith(t.identifier('window'))
       }
