@@ -3,6 +3,9 @@
   "version": "1.2.0",
   "description": "",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "start": "tsc -w",
     "build": "tsc",
