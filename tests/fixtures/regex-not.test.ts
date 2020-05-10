@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/regex-not@1.0.2/index.js
 

@@ -1,4 +1,4 @@
-import transform from './test-util'
+import transform from '../test-util'
 
 test('require for side effects', async () => {
   const input = `

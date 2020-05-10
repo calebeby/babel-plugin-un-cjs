@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 test('wait-for-expect', async () => {
   const input = `

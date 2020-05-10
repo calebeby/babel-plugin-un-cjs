@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/expect@24.8.0/build/extractExpectedAssertionsErrors.js
 

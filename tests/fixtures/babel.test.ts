@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/@babel/core@7.6.4/lib/index.js
 

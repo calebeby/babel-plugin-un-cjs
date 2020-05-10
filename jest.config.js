@@ -1,5 +1,5 @@
 module.exports = {
-  testRegex: '\\.test\\.(md|ts|js)$',
+  testRegex: 'tests/.*\\.(md|ts|js)$',
   transform: {
     '\\.md$': './jest-transform',
     '\\.ts$': 'babel-jest',

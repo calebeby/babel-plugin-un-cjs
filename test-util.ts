@@ -1,5 +1,5 @@
 import { transformAsync as babelTransform } from '@babel/core'
-import babelPlugin from '../src'
+import babelPlugin from './src'
 import * as prettier from 'prettier'
 
 const transform = async (inputCode: string) => {

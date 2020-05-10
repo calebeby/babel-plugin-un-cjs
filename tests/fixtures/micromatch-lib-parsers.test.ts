@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/micromatch@3.1.0/lib/parsers.js
 

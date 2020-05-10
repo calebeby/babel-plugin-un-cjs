@@ -1,4 +1,4 @@
-import transform from './test-util'
+import transform from '../test-util'
 
 test('replaces global with window', async () => {
   const input = `

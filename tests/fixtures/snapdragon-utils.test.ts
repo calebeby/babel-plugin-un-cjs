@@ -1,5 +1,5 @@
 // based on https://unpkg.com/snapdragon@0.8.2/lib/utils.js
-import transform from '../test-util'
+import transform from '../../test-util'
 
 const input = `
 exports.extend = require('extend-shallow');

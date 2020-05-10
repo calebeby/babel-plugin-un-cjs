@@ -73,7 +73,7 @@ const transformer = {
     const input = codeBlocks[0]
     const output = codeBlocks[1]
     const flag = frontMatter.skip ? '.skip' : ''
-    const transformPath = require.resolve('./tests/test-util.ts')
+    const transformPath = require.resolve('./test-util.ts')
     const code = `
     const transform = require(${JSON.stringify(transformPath)}).default
 
