@@ -5,7 +5,10 @@ test('replaces global with window', async () => {
 console.log(global.asdf)
 `
   const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`"console.log(window.asdf);"`)
+  expect(transformed).toMatchInlineSnapshot(`
+    "console.log(window.asdf)
+    "
+  `)
 })
 
 test('removes __esModule', async () => {
@@ -31,11 +34,12 @@ Object.defineProperty(exports, "version", {
   `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "let _default = {};
-      import { version } from \\"../package.json\\";
-      export { version };
-      _default.version = version;
-      export default _default;"
+      "let _default = {}
+      import { version } from '../package.json'
+      export { version }
+      _default.version = version
+      export default _default
+      "
     `)
   })
   describe('handles objects', () => {
@@ -50,18 +54,19 @@ module.exports.foobarbaz = 'foobarbaz'
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "const foo = 'foo';
-        _default.foobar = 'foobar';
+        "const foo = 'foo'
+        _default.foobar = 'foobar'
 
-        const _foo = () => {};
+        const _foo = () => {}
 
-        export { _foo as foo };
+        export { _foo as foo }
         let _default = {
-          foo: _foo
-        };
-        export const foobarbaz = 'foobarbaz';
-        _default.foobarbaz = foobarbaz;
-        export default _default;"
+          foo: _foo,
+        }
+        export const foobarbaz = 'foobarbaz'
+        _default.foobarbaz = foobarbaz
+        export default _default
+        "
       `)
     })
     test('export property on referenced object', async () => {
@@ -75,16 +80,17 @@ module.exports.otherExport = 'otherExport'
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "export const foo = () => {};
+        "export const foo = () => {}
         const obj = {
-          foo: foo
-        };
-        let _default = obj;
-        export const foobarbaz = 'foobarbaz';
-        obj.foobarbaz = foobarbaz;
-        export const otherExport = 'otherExport';
-        _default.otherExport = otherExport;
-        export default _default;"
+          foo: foo,
+        }
+        let _default = obj
+        export const foobarbaz = 'foobarbaz'
+        obj.foobarbaz = foobarbaz
+        export const otherExport = 'otherExport'
+        _default.otherExport = otherExport
+        export default _default
+        "
       `)
     })
   })
@@ -115,12 +121,13 @@ module.exports = main
 `
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
-        "let main = () => {};
+        "let main = () => {}
 
-        export const other = 'hiiiii';
-        main.other = other;
-        let _default = main;
-        export default _default;"
+        export const other = 'hiiiii'
+        main.other = other
+        let _default = main
+        export default _default
+        "
       `)
     })
   })
@@ -144,9 +151,10 @@ Object.keys(_waitFor).forEach(function (key) {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {};
-    export * from \\"./wait-for\\";
-    export default _default;"
+    "let _default = {}
+    export * from './wait-for'
+    export default _default
+    "
   `)
 })
 
@@ -167,9 +175,10 @@ Object.keys(_waitFor).forEach(function (key) {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {};
-    export * from \\"./wait-for\\";
-    export default _default;"
+    "let _default = {}
+    export * from './wait-for'
+    export default _default
+    "
   `)
 })
 
@@ -201,9 +210,10 @@ test('destructured require', async () => {
 const { docsUrl, foo: bar, default: utils } = require('../utilities');
 `
   const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(
-    `"import { docsUrl, foo as bar, default as utils } from '../utilities';"`,
-  )
+  expect(transformed).toMatchInlineSnapshot(`
+    "import { docsUrl, foo as bar, default as utils } from '../utilities'
+    "
+  `)
 })
 
 describe('uses single declaration for _default if possible', () => {
@@ -216,12 +226,13 @@ module.exports = {
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "_default.bar = 'hi';
-      export const foo = () => {};
+      "_default.bar = 'hi'
+      export const foo = () => {}
       let _default = {
-        foo: foo
-      };
-      export default _default;"
+        foo: foo,
+      }
+      export default _default
+      "
     `)
   })
 
@@ -237,13 +248,14 @@ exports = {
     // And in the above module.exports code foo is exported but not here
     // It is because assigning to the `exports` object does not clear out the `module.exports` object
     expect(transformed).toMatchInlineSnapshot(`
-      "let _default = {};
-      export const bar = 'hi';
-      _default.bar = bar;
+      "let _default = {}
+      export const bar = 'hi'
+      _default.bar = bar
       _default = {
-        foo: () => {}
-      };
-      export default _default;"
+        foo: () => {},
+      }
+      export default _default
+      "
     `)
   })
 })

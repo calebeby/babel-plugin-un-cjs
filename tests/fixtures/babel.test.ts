@@ -58,89 +58,96 @@ function Plugin(alias) {
 test('babel', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {};
-    import _template from \\"@babel/template\\";
-    import { version } from \\"../package.json\\";
-    export { Plugin };
-    _default.Plugin = Plugin;
-    export { version };
-    _default.version = version;
-    export { _template as template };
-    _default.template = _template;
+    "let _default = {}
+    import _template from '@babel/template'
+    import { version } from '../package.json'
+    export { Plugin }
+    _default.Plugin = Plugin
+    export { version }
+    _default.version = version
+    export { _template as template }
+    _default.template = _template
 
     function _getRequireWildcardCache() {
-      if (typeof WeakMap !== \\"function\\") return null;
-      var cache = new WeakMap();
+      if (typeof WeakMap !== 'function') return null
+      var cache = new WeakMap()
 
       _getRequireWildcardCache = function () {
-        return cache;
-      };
+        return cache
+      }
 
-      return cache;
+      return cache
     }
 
     function _interopRequireWildcard(obj) {
       if (obj && obj.__esModule) {
-        return obj;
+        return obj
       }
 
-      var cache = _getRequireWildcardCache();
+      var cache = _getRequireWildcardCache()
 
       if (cache && cache.has(obj)) {
-        return cache.get(obj);
+        return cache.get(obj)
       }
 
-      var newObj = {};
+      var newObj = {}
 
       if (obj != null) {
-        var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+        var hasPropertyDescriptor =
+          Object.defineProperty && Object.getOwnPropertyDescriptor
 
         for (var key in obj) {
           if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+            var desc = hasPropertyDescriptor
+              ? Object.getOwnPropertyDescriptor(obj, key)
+              : null
 
             if (desc && (desc.get || desc.set)) {
-              Object.defineProperty(newObj, key, desc);
+              Object.defineProperty(newObj, key, desc)
             } else {
-              newObj[key] = obj[key];
+              newObj[key] = obj[key]
             }
           }
         }
       }
 
-      newObj.default = obj;
+      newObj.default = obj
 
       if (cache) {
-        cache.set(obj, newObj);
+        cache.set(obj, newObj)
       }
 
-      return newObj;
+      return newObj
     }
 
     function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : {
-        default: obj
-      };
+      return obj && obj.__esModule
+        ? obj
+        : {
+            default: obj,
+          }
     }
 
-    const DEFAULT_EXTENSIONS = Object.freeze([\\".js\\", \\".jsx\\", \\".es6\\", \\".es\\", \\".mjs\\"]);
-    export { DEFAULT_EXTENSIONS };
-    _default.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS;
+    const DEFAULT_EXTENSIONS = Object.freeze(['.js', '.jsx', '.es6', '.es', '.mjs'])
+    export { DEFAULT_EXTENSIONS }
+    _default.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS
 
     class OptionManager {
       init(opts) {
-        return (0, _config.loadOptions)(opts);
+        return (0, _config.loadOptions)(opts)
       }
-
     }
 
-    export { OptionManager };
-    _default.OptionManager = OptionManager;
+    export { OptionManager }
+    _default.OptionManager = OptionManager
 
     function Plugin(alias) {
-      throw new Error(\`The (\${alias}) Babel 5 plugin is being run with an unsupported Babel version.\`);
+      throw new Error(
+        \`The (\${alias}) Babel 5 plugin is being run with an unsupported Babel version.\`,
+      )
     }
 
-    export default _default;"
+    export default _default
+    "
   `)
 })

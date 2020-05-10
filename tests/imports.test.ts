@@ -5,7 +5,10 @@ test('require for side effects', async () => {
 require('asdf')
 `
   const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`"import 'asdf';"`)
+  expect(transformed).toMatchInlineSnapshot(`
+    "import 'asdf'
+    "
+  `)
 })
 
 test('require("asdf").foo', async () => {
@@ -14,8 +17,9 @@ const stdoutColor = require('supports-color').stdout;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import { stdout } from 'supports-color';
-    const stdoutColor = stdout;"
+    "import { stdout } from 'supports-color'
+    const stdoutColor = stdout
+    "
   `)
 })
 
@@ -36,8 +40,9 @@ console.log(_parser().tokTypes)
 
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import { tokTypes } from \\"@babel/parser\\";
-    console.log(tokTypes);"
+    "import { tokTypes } from '@babel/parser'
+    console.log(tokTypes)
+    "
   `)
 })
 
@@ -50,11 +55,12 @@ foo()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import _foo from 'bar';
+      "import _foo from 'bar'
 
-      _foo.bar();
+      _foo.bar()
 
-      _foo();"
+      _foo()
+      "
     `)
   })
 
@@ -66,9 +72,10 @@ foo.baz()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import { bar, baz } from 'bar';
-      bar();
-      baz();"
+      "import { bar, baz } from 'bar'
+      bar()
+      baz()
+      "
     `)
   })
 })
@@ -81,9 +88,10 @@ console.log(_hi.default);
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import _hi from \\"hi\\";
-    (0, _hi)();
-    console.log(_hi);"
+    "import _hi from 'hi'
+    ;(0, _hi)()
+    console.log(_hi)
+    "
   `)
 })
 
@@ -98,13 +106,14 @@ const foo = () => {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import _hi2 from \\"hi\\";
-    const _hi = 'hi';
+    "import _hi2 from 'hi'
+    const _hi = 'hi'
 
     const foo = () => {
-      (0, _hi2)();
-      console.log(_hi2);
-    };"
+      ;(0, _hi2)()
+      console.log(_hi2)
+    }
+    "
   `)
 })
 
@@ -118,12 +127,13 @@ const foo = () => {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import _hi from \\"hi\\";
+    "import _hi from 'hi'
 
     const foo = () => {
-      (0, _hi)();
-      console.log(_hi);
-    };"
+      ;(0, _hi)()
+      console.log(_hi)
+    }
+    "
   `)
 })
 
@@ -135,9 +145,10 @@ foo.asdf()
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as foo from \\"asdf\\";
-    foo();
-    foo.asdf();"
+    "import * as foo from 'asdf'
+    foo()
+    foo.asdf()
+    "
   `)
 })
 
@@ -151,12 +162,13 @@ const asdf = () => {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as foo from \\"asdf\\";
+    "import * as foo from 'asdf'
 
     const asdf = () => {
-      foo();
-      foo.asdf();
-    };"
+      foo()
+      foo.asdf()
+    }
+    "
   `)
 })
 
@@ -171,14 +183,15 @@ const asdf = () => {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as _foo from \\"asdf\\";
-    const foo = 'hi';
+    "import * as _foo from 'asdf'
+    const foo = 'hi'
 
     const asdf = () => {
-      _foo();
+      _foo()
 
-      _foo.asdf();
-    };"
+      _foo.asdf()
+    }
+    "
   `)
 })
 
@@ -189,8 +202,9 @@ asdf_1.default();
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import asdf_1 from \\"asdf\\";
-    asdf_1();"
+    "import asdf_1 from 'asdf'
+    asdf_1()
+    "
   `)
 })
 
@@ -202,8 +216,9 @@ foo.asdf();
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as foo from \\"asdf\\";
-    foo();
-    foo.asdf();"
+    "import * as foo from 'asdf'
+    foo()
+    foo.asdf()
+    "
   `)
 })

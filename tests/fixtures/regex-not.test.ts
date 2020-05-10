@@ -23,24 +23,25 @@ module.exports = toRegex;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "'use strict';
+    "'use strict'
 
-    import _safe from 'safe-regex';
-    import _extend from 'extend-shallow';
+    import _safe from 'safe-regex'
+    import _extend from 'extend-shallow'
 
     function toRegex(pattern, options) {
-      return new RegExp(toRegex.create(pattern, options));
+      return new RegExp(toRegex.create(pattern, options))
     }
 
     export const create = function (pattern, options) {
-      _extend(foo, bar);
+      _extend(foo, bar)
 
-      _safe(blah);
+      _safe(blah)
 
-      return 'blah';
-    };
-    toRegex.create = create;
-    let _default = toRegex;
-    export default _default;"
+      return 'blah'
+    }
+    toRegex.create = create
+    let _default = toRegex
+    export default _default
+    "
   `)
 })
