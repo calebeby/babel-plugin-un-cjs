@@ -21,11 +21,11 @@ const parseMarkdown = (lines) => {
   for (let i = 0; i < lines.length; i++) {
     /** @type {Line} */
     const line = { line: i + 1, contents: lines[i] }
-    if (line.contents.trim() === '') continue
 
     const lastChunk = chunks[chunks.length - 1]
 
     if (currentNodeType === NORMAL) {
+      if (line.contents.trim() === '') continue
       if (line.contents.startsWith('# ')) {
         chunks.push({ nodeType: HEADING, lines: [line] })
       } else if (line.contents.startsWith('```js')) {

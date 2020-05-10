@@ -16,7 +16,7 @@ myModule.foo()
 myModule.bar()
 ```
 
-# (skip) Uses default import if top-level name is used
+# Uses default import if top-level name is used
 
 ```js
 const myModule = require('my-module')
