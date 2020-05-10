@@ -1,27 +1,5 @@
 import transform from '../test-util'
 
-test('require for side effects', async () => {
-  const input = `
-require('asdf')
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`
-    "import 'asdf'
-    "
-  `)
-})
-
-test('require("asdf").foo', async () => {
-  const input = `
-const stdoutColor = require('supports-color').stdout;
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`
-    "import { stdout as stdoutColor } from 'supports-color'
-    "
-  `)
-})
-
 test('simplifies babel lazy import block', async () => {
   const input = `
 function _parser() {
