@@ -69,7 +69,7 @@ const transformer = {
     const frontMatter = getFrontMatter(lines)
     const codeBlocks = getCodeBlocks(lines)
 
-    const name = frontMatter.name || filename
+    const name = frontMatter.name || path.parse(filename).name
     const input = codeBlocks[0]
     const output = codeBlocks[1]
     const flag = frontMatter.skip ? '.skip' : ''

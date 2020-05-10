@@ -32,7 +32,7 @@ export type ModulePathsToReplace = Set<
   NodePath<t.Identifier | t.MemberExpression>
 >
 
-export default declare(api => {
+export default declare((api) => {
   api.assertVersion(7)
 
   const namedExports: NamedExportsMap = new Map()
@@ -43,7 +43,7 @@ export default declare(api => {
     Program: {
       exit(programPath) {
         if (!bail) {
-          Array.from(pathsToRemove.values()).forEach(p => p.remove())
+          Array.from(pathsToRemove.values()).forEach((p) => p.remove())
           writeExports(programPath, modulePathsToReplace, namedExports)
         }
 

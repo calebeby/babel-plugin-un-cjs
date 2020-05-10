@@ -20,7 +20,7 @@ export const getRequirePath = (requireStatement: t.Node) => {
 }
 
 export const getProgramPath = (path: NodePath<unknown>) =>
-  path.find(p => p.isProgram()) as NodePath<t.Program>
+  path.find((p) => p.isProgram()) as NodePath<t.Program>
 
 export const getProgramBody = (path: NodePath<unknown>) =>
   getProgramPath(path).get('body.0') as NodePath<t.Node>
@@ -35,7 +35,7 @@ export const generateIdentifier = (scope: Scope, name: string) =>
 /** Object.assign but for maps */
 export const assignMaps = <Key, Val>(
   map: Map<Key, Val>,
-  ...sources: (Map<Key, Val>)[]
+  ...sources: Map<Key, Val>[]
 ) => {
   for (let source of sources) {
     const entries = source.entries()
@@ -47,7 +47,7 @@ export const assignMaps = <Key, Val>(
  * From a descendent, go up until you hit a direct child of the program path
  */
 export const findParentProgramChild = (path: NodePath) =>
-  path.find(p => p.parentPath.isProgram())
+  path.find((p) => p.parentPath.isProgram())
 
 export const everyParent = (
   path: NodePath,
@@ -70,7 +70,7 @@ export const isTopLevel = (path: NodePath) =>
   t.isProgram(path.parentPath.parent) ||
   everyParent(
     path,
-    p =>
+    (p) =>
       // workaround to allow for: const foo = module.exports = 'asdf'
       (p.isProgram() ||
         p.isAssignmentExpression() ||

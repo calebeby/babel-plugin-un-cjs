@@ -10,6 +10,7 @@
     "start": "tsc -w",
     "build": "tsc",
     "test": "jest",
+    "format": "prettier --write .",
     "test:watch": "jest --watch"
   },
   "keywords": [],

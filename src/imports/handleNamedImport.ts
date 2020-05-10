@@ -44,7 +44,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     // Handling:
     // const { a, foo: bar } = require("....")
     const importSpecifiers: t.ImportSpecifier[] = originalId.node.properties
-      .map(prop => {
+      .map((prop) => {
         // ignore rest/spread, can't do that
         // Potentially in the future we can handle rest/spread with namespace import
         if (!t.isObjectProperty(prop)) return
@@ -67,7 +67,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   let importIds = new Map<string, t.Identifier>()
 
   // if we use foo.bar and foo directly, then we should _just_ import default
-  const usesDefaultImport = binding.referencePaths.some(referencePath => {
+  const usesDefaultImport = binding.referencePaths.some((referencePath) => {
     // at least one of the references is foo directly instead of a property
     return !t.isMemberExpression(referencePath.parent)
   })
@@ -79,7 +79,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
 
   if (usesDefaultImport) {
     // rename all instances of foo.bar to _foo.bar foo to _foo
-    binding.referencePaths.forEach(referencePath => {
+    binding.referencePaths.forEach((referencePath) => {
       // I think this should always be true afaik but just to make sure
       if (
         t.isIdentifier(referencePath.node) &&
@@ -92,7 +92,7 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     // loop through all the references and generate ids for them
     // we will be importing them as {_bar, _baz}
     // change the references to _bar and _baz
-    binding.referencePaths.forEach(referencePath => {
+    binding.referencePaths.forEach((referencePath) => {
       const memberExpressionNode = referencePath.parent
       const memberExpressionPath = referencePath.parentPath
       if (!t.isMemberExpression(memberExpressionNode)) return

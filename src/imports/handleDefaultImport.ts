@@ -36,7 +36,7 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
 
   pathsToRemove.add(varPath)
   // replace all references foo.default with reference to `import`ed
-  binding.referencePaths.forEach(referencePath => {
+  binding.referencePaths.forEach((referencePath) => {
     const { parent, parentPath } = referencePath
     if (!t.isMemberExpression(parent)) {
       // if it isn't foo.default (for example if it was generated with babel lazy modules)

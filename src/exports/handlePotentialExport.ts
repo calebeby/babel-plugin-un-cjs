@@ -10,7 +10,7 @@ const getNamedExportsFromReferencedAssignments = (
   binding: Binding,
 ): NamedExportsMap => {
   const exportsMap: NamedExportsMap = new Map()
-  binding.referencePaths.forEach(refPath => {
+  binding.referencePaths.forEach((refPath) => {
     // idk if this will ever be false... but type narrowing
     if (!refPath.isIdentifier()) return
     const memExp = refPath.parentPath
@@ -35,7 +35,7 @@ const getNamedExportsFromObject = (
   obj: NodePath<t.ObjectExpression>,
 ): NamedExportsMap => {
   const exportsMap: NamedExportsMap = new Map()
-  obj.get('properties').forEach(prop => {
+  obj.get('properties').forEach((prop) => {
     if (
       prop.isObjectProperty() &&
       t.isIdentifier(prop.node.key) &&

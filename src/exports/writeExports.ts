@@ -64,7 +64,7 @@ export const writeExports = (
     const emptyObject = t.objectExpression([])
     /** Each of these nodes is module.exports = ... */
     const directAssignmentsToExportObject = modulePathsArray
-      .map(p => {
+      .map((p) => {
         // exports = ... does nothing in node, see the big comment above
         if (p.isIdentifier() && p.node.name === 'exports') return
         const parent = p.parentPath
@@ -121,7 +121,7 @@ export const writeExports = (
         t.exportDefaultDeclaration(exportObjectId),
       )
     newDeclarationPath.scope.registerDeclaration(newDeclarationPath)
-    modulePathsArray.forEach(path => {
+    modulePathsArray.forEach((path) => {
       path.replaceWith(exportObjectId)
     })
   }
