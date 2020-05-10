@@ -100,49 +100,11 @@ const parseMarkdown = (lines) => {
 
 /** @type {import('@jest/transform').Transformer} */
 const transformer = {
-  getCacheKey(
-    fileData,
-    filename,
-    configString,
-    { config, instrument, rootDir },
-  ) {
-    return crypto
-      .createHash('md5')
-      .update(THIS_FILE)
-      .update('\0', 'utf8')
-      .update(fileData)
-      .update('\0', 'utf8')
-      .update(path.relative(rootDir, filename))
-      .update('\0', 'utf8')
-      .update(configString)
-      .update('\0', 'utf8')
-      .update(instrument ? 'instrument' : '')
-      .update('\0', 'utf8')
-      .update(process.env.NODE_ENV || '')
-      .digest('hex')
-  },
-
-  process(src, filename, config, transformOptions) {
+  process(src, filename, config) {
     const lines = src.split('\n')
     const tests = parseMarkdown(lines)
 
     const map = new SourceMapGenerator()
-
-    const testsText = tests
-      .map((t) => {
-        const assertionsText = t.assertions
-          .map((a) => {
-            const input = JSON.stringify(
-              a.input.map((l) => l.contents).join('\n'),
-            )
-            const expected = JSON.stringify(
-              a.expected.map((l) => l.contents).join('\n') + '\n',
-            )
-            return `expect(await transform(${input})).toEqual(${expected});`
-          })
-          .join('\n')
-      })
-      .join('\n')
 
     const transformPath = JSON.stringify(require.resolve('./test-util.ts'))
     let code = `const transform = require(${transformPath}).default`
