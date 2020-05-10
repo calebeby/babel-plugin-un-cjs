@@ -72,11 +72,12 @@ const transformer = {
     const name = frontMatter.name || filename
     const input = codeBlocks[0]
     const output = codeBlocks[1]
+    const flag = frontMatter.skip ? '.skip' : ''
     const transformPath = require.resolve('./tests/test-util.ts')
     const code = `
     const transform = require(${JSON.stringify(transformPath)}).default
 
-    test(${JSON.stringify(name)}, async () => {
+    test${flag}(${JSON.stringify(name)}, async () => {
       const input = ${JSON.stringify(input)}
       const expected = ${JSON.stringify(output)}
       expect(await transform(input)).toEqual(expected)
