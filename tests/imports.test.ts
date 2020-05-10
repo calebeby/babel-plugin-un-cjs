@@ -17,8 +17,7 @@ const stdoutColor = require('supports-color').stdout;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import { stdout } from 'supports-color'
-    const stdoutColor = stdout
+    "import { stdout as stdoutColor } from 'supports-color'
     "
   `)
 })

@@ -6,5 +6,5 @@ module.exports = {
   },
   moduleFileExtensions: ['js', 'md', 'ts'],
   testEnvironment: 'node',
-  // testRunner: 'jest-circus/runner',
+  testRunner: 'jest-circus/runner',
 }

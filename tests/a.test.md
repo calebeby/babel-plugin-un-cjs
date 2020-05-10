@@ -1,6 +1,4 @@
----
-name: Example
----
+# Example
 
 ```js
 const { foo } = require('bar')

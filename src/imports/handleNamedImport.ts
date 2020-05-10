@@ -14,10 +14,26 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const importString = getRequirePath(node)
   if (!importString) return
   if (path.parentPath.isMemberExpression()) {
-    // handling const foo = require('asdf').foo
+    // handling require('asdf').foo
+    // transforms to import {foo} from 'asdf' and replace expression with foo
     const memberExp = path.parentPath
     if (!t.isIdentifier(memberExp.node.property)) return
     const importId = memberExp.node.property
+    if (
+      memberExp.parentPath.isVariableDeclarator() &&
+      t.isIdentifier(memberExp.parentPath.node.id)
+    ) {
+      // special case: handling const asdf = require('asdf').foo
+      // transforms to import {foo as asdf} from 'asdf'
+      // MAKE SURE to _not_ handle const {asdf} = require('asdf').foo
+      const newImport = t.importDeclaration(
+        [t.importSpecifier(memberExp.parentPath.node.id, importId)],
+        importString,
+      )
+      injectImport(path, newImport)
+      memberExp.parentPath.remove()
+      return
+    }
     const localId = generateIdentifier(
       path.scope.getProgramParent(),
       importId.name,
