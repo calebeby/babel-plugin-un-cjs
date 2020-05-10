@@ -2,6 +2,7 @@
 const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
+const { SourceMapGenerator } = require('source-map')
 
 const THIS_FILE = fs.readFileSync(__filename)
 
@@ -12,18 +13,22 @@ const parseMarkdown = (lines) => {
   const NORMAL = 'normal'
   let currentNodeType = NORMAL
 
-  /** @type {{nodeType: string, lines: string[]}[]} */
+  /** @typedef {{line: number, contents}} Line */
+
+  /** @type {{nodeType: string, lines: Line[]}[]} */
   const chunks = []
 
-  for (let line of lines) {
-    if (line.trim() === '') continue
+  for (let i = 0; i < lines.length; i++) {
+    /** @type {Line} */
+    const line = { line: i + 1, contents: lines[i] }
+    if (line.contents.trim() === '') continue
 
     const lastChunk = chunks[chunks.length - 1]
 
     if (currentNodeType === NORMAL) {
-      if (line.startsWith('# ')) {
+      if (line.contents.startsWith('# ')) {
         chunks.push({ nodeType: HEADING, lines: [line] })
-      } else if (line.startsWith('```js')) {
+      } else if (line.contents.startsWith('```js')) {
         currentNodeType = CODE
         chunks.push({ nodeType: CODE, lines: [] })
       } else if (lastChunk.nodeType === NORMAL) {
@@ -32,7 +37,7 @@ const parseMarkdown = (lines) => {
         chunks.push({ nodeType: NORMAL, lines: [line] })
       }
     } else if (currentNodeType === CODE) {
-      if (line.startsWith('```')) {
+      if (line.contents.startsWith('```')) {
         currentNodeType = NORMAL
       } else {
         lastChunk.lines.push(line)
@@ -40,8 +45,8 @@ const parseMarkdown = (lines) => {
     }
   }
 
-  /** @typedef {{input: string, expected: string}} Assertion */
-  /** @typedef {{name: string, assertions: Assertion[]}} Test */
+  /** @typedef {{input: Line[], expected: Line[], line: number}} Assertion */
+  /** @typedef {{name: string, assertions: Assertion[], flag?: string}} Test */
 
   /** @type {Test[]} */
   const tests = []
@@ -55,9 +60,18 @@ const parseMarkdown = (lines) => {
     const next = chunks[i + 1]
     if (current.nodeType === HEADING) {
       if (currentTest) tests.push(currentTest)
+      const testName = current.lines[0].contents.replace(/^# /, '')
+      const SKIP = '(skip)'
+      const ONLY = '(only)'
+      const flag = testName.includes(SKIP)
+        ? 'skip'
+        : testName.includes(ONLY)
+        ? 'only'
+        : undefined
       currentTest = {
-        name: current.lines[0].replace(/^# /, ''),
+        name: testName.replace(SKIP, '').replace(ONLY, '').trim(),
         assertions: [],
+        flag,
       }
       continue
     }
@@ -71,11 +85,12 @@ const parseMarkdown = (lines) => {
       next.nodeType === CODE &&
       current.nodeType === NORMAL &&
       current.lines.length === 1 &&
-      current.lines[0] === 'to'
+      current.lines[0].contents === 'to'
     ) {
       currentTest.assertions.push({
-        input: prev.lines.join('\n'),
-        expected: next.lines.join('\n') + '\n',
+        input: prev.lines,
+        expected: next.lines,
+        line: current.lines[0].line,
       })
     }
   }
@@ -111,29 +126,54 @@ const transformer = {
     const lines = src.split('\n')
     const tests = parseMarkdown(lines)
 
+    const map = new SourceMapGenerator()
+
     const testsText = tests
       .map((t) => {
         const assertionsText = t.assertions
           .map((a) => {
-            const input = JSON.stringify(a.input)
-            const expected = JSON.stringify(a.expected)
+            const input = JSON.stringify(
+              a.input.map((l) => l.contents).join('\n'),
+            )
+            const expected = JSON.stringify(
+              a.expected.map((l) => l.contents).join('\n') + '\n',
+            )
             return `expect(await transform(${input})).toEqual(${expected});`
           })
           .join('\n')
-        return `test(${JSON.stringify(t.name)}, async () => {
-          ${assertionsText}
-        })`
       })
       .join('\n')
 
-    const transformPath = require.resolve('./test-util.ts')
-    const code = `
-    const transform = require(${JSON.stringify(transformPath)}).default
+    const transformPath = JSON.stringify(require.resolve('./test-util.ts'))
+    let code = `const transform = require(${transformPath}).default`
 
-    ${testsText}
-    `
+    for (let test of tests) {
+      const flag = test.flag ? `.${test.flag}` : ''
+      code += `\ntest${flag}(${JSON.stringify(test.name)}, async () => {\n`
+      for (let assertion of test.assertions) {
+        const input = JSON.stringify(
+          assertion.input.map((l) => l.contents).join('\n'),
+        )
+        const expected = JSON.stringify(
+          assertion.expected.map((l) => l.contents).join('\n') + '\n',
+        )
+        code += `\nexpect(await transform(${input})).toEqual(${expected})`
+        map.addMapping({
+          generated: {
+            line: code.split('\n').length,
+            column: 0,
+          },
+          source: path.resolve(config.rootDir, filename),
+          original: {
+            line: assertion.line,
+            column: 0,
+          },
+        })
+      }
+      code += '\n})'
+    }
 
-    return { code }
+    return { code, map: map.toJSON() }
   },
 }
 

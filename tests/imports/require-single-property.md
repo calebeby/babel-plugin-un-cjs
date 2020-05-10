@@ -1,5 +1,9 @@
 # Require Single Property Shorthand
 
+heres some text
+
+blah
+
 ```js
 const asdf = require('file').foo
 ```
