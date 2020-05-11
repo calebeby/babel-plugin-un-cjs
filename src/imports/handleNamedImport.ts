@@ -52,7 +52,23 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     parentPath.replaceWith(t.importDeclaration([], importString))
     return
   }
-  if (!parentPath.isVariableDeclarator()) return
+  if (!parentPath.isVariableDeclarator()) {
+    // handling cases where require statement is within another expression
+    // console.log(require('foo'))
+    // Becomes
+    // import foo from 'foo'; console.log(foo)
+    const id = generateIdentifier(
+      path.scope,
+      importString.value.replace(/[^a-zA-Z]/g, ''),
+    )
+    const newImport = t.importDeclaration(
+      [t.importDefaultSpecifier(id)],
+      importString,
+    )
+    injectImport(path, newImport)
+    path.replaceWith(id)
+    return
+  }
   const variableDeclarator = parentPath
   // const foo = require('asdf')
   const originalId = variableDeclarator.get('id')

@@ -34,9 +34,7 @@ myModule.foo()
 myModule.bar()
 ```
 
-# (skip) Uses default import if require result is used directly
-
-(not implemented yet)
+# Uses default import if require result is used directly
 
 ```js
 console.log(require('foo-bar'))
@@ -45,6 +43,41 @@ console.log(require('foo-bar'))
 to
 
 ```js
-import _1 from 'foo-bar'
-console.log(_1)
+import foobar from 'foo-bar'
+console.log(foobar)
+```
+
+And it doesn't conflict the name:
+
+```js
+const foobar = 'dont override me'
+console.log(require('foo-bar'))
+```
+
+to
+
+```js
+import _foobar from 'foo-bar'
+const foobar = 'dont override me'
+console.log(_foobar)
+```
+
+Even in a sub scope:
+
+```js
+const foobar = () => {
+  const _foobar = 'hi'
+  console.log(require('foo-bar'))
+}
+```
+
+to
+
+```js
+import _foobar2 from 'foo-bar'
+
+const foobar = () => {
+  const _foobar = 'hi'
+  console.log(_foobar2)
+}
 ```

@@ -4,7 +4,12 @@ import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
 import { handleNamedImport } from './imports/handleNamedImport'
 import { handleWildcardImport } from './imports/handleWildcardImport'
-import { pathsToRemove, isTopLevel, isModuleExports } from './helpers'
+import {
+  pathsToRemove,
+  isTopLevel,
+  isModuleExports,
+  isStillInTree,
+} from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 import { handlePotentialLazyImportFunction } from './handlePotentialLazyImportFunction'
@@ -57,6 +62,8 @@ export default declare((api) => {
 
     CallExpression(path) {
       const { node } = path
+      // (path.removed on a node does not reflect ancestor removal)
+      if (!isStillInTree(path)) return
       handlePotentialObjectDefineProperty(path, namedExports)
       if (!t.isIdentifier(node.callee)) {
         // Handle transforming babel export * from "" blocks like this:

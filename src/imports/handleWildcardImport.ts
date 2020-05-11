@@ -1,10 +1,5 @@
 import { types as t, NodePath } from '@babel/core'
-import {
-  getRequirePath,
-  generateIdentifier,
-  getProgramBody,
-  pathsToRemove,
-} from '../helpers'
+import { getRequirePath, generateIdentifier, getProgramBody } from '../helpers'
 
 export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   const { node } = path
@@ -19,7 +14,7 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   )
     return
   const oldId = variableDeclarator.id
-  pathsToRemove.add(varPath)
+  varPath.remove()
   const varScope = path.scope
   const globalScope = varScope.getProgramParent()
   const globalBinding = globalScope.getBinding(oldId.name)

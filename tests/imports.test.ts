@@ -158,13 +158,12 @@ const asdf = () => {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as _foo from 'asdf'
+    "import * as foo from 'asdf'
     const foo = 'hi'
 
     const asdf = () => {
-      _foo()
-
-      _foo.asdf()
+      foo()
+      foo.asdf()
     }
     "
   `)

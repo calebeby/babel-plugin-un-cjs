@@ -53,8 +53,8 @@ export const everyParent = (
   path: NodePath,
   condition: (p: NodePath) => boolean,
 ): boolean => {
-  if (condition(path) && path.isProgram()) return true
   if (condition(path)) {
+    if (path.isProgram()) return true
     return everyParent(path.parentPath, condition)
   }
   return false
@@ -78,3 +78,10 @@ export const isTopLevel = (path: NodePath) =>
         p.isVariableDeclarator()) &&
       p.parentKey !== 'right',
   )
+
+/**
+ * Returns whether this node and all of its parents are not removed
+ * This is needed because path.removed does not reflect ancestor removal
+ */
+export const isStillInTree = (path: NodePath) =>
+  everyParent(path, (p) => !p.removed)

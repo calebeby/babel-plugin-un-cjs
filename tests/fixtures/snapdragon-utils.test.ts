@@ -27,13 +27,16 @@ exports.last = function(arr, n) {
 test('snapdragon-utils', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import * as sourceMapResolve from 'source-map-resolve'
-    import * as SourceMap from 'source-map'
-    import * as extend from 'extend-shallow'
-    let _default = {}
-    _default.extend = extend
-    _default.SourceMap = SourceMap
-    _default.sourceMapResolve = sourceMapResolve
+    "let _default = {}
+    import sourcemapresolve from 'source-map-resolve'
+    import sourcemap from 'source-map'
+    import extendshallow from 'extend-shallow'
+    export { extendshallow as extend }
+    _default.extend = extendshallow
+    export { sourcemap as SourceMap }
+    _default.SourceMap = sourcemap
+    export { sourcemapresolve as sourceMapResolve }
+    _default.sourceMapResolve = sourcemapresolve
     export const unixify = function (fp) {
       return 'unixify'
     }

@@ -4,7 +4,6 @@ import {
   getProgramPath,
   generateIdentifier,
   getProgramBody,
-  pathsToRemove,
 } from '../helpers'
 
 export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
@@ -34,7 +33,8 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
   )
   const newPath = getProgramBody(programPath).insertBefore([newImport])[0]
 
-  pathsToRemove.add(varPath)
+  varPath.remove()
+
   // replace all references foo.default with reference to `import`ed
   binding.referencePaths.forEach((referencePath) => {
     const { parent, parentPath } = referencePath
