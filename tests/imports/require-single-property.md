@@ -1,6 +1,7 @@
 # Require Single Property, assigned to variable
 
 // TODO: Verify import ordering
+// TODO: What about optional chaining? What would that entail?
 
 ```js
 const asdf = require('file').foo
