@@ -49,16 +49,16 @@ exports.default = _default;
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default2 = {}
-    import { setState, getState } from './jestMatchersObject'
-    import { EXPECTED_COLOR, pluralize, RECEIVED_COLOR } from 'jest-matcher-utils'
+    import * as _jestMatchersObject from './jestMatchersObject'
+    import * as _jestMatcherUtils from 'jest-matcher-utils'
     _default2.default = void 0
 
     const resetAssertionsLocalState = () => {
-      ;(0, setState)()
+      ;(0, _jestMatchersObject.setState)()
     }
 
     const extractExpectedAssertionsErrors = () => {
-      const _getState = (0, getState)(),
+      const _getState = (0, _jestMatchersObject.getState)(),
         assertionCalls = _getState.assertionCalls,
         expectedAssertionsNumber = _getState.expectedAssertionsNumber,
         expectedAssertionsNumberError = _getState.expectedAssertionsNumberError,
@@ -71,14 +71,16 @@ exports.default = _default;
         typeof expectedAssertionsNumber === 'number' &&
         assertionCalls !== expectedAssertionsNumber
       ) {
-        const numOfAssertionsExpected = (0, EXPECTED_COLOR)(
-          (0, pluralize)('assertion', expectedAssertionsNumber),
+        const numOfAssertionsExpected = (0, _jestMatcherUtils.EXPECTED_COLOR)(
+          (0, _jestMatcherUtils.pluralize)('assertion', expectedAssertionsNumber),
         )
       }
 
       if (isExpectingAssertions && assertionCalls === 0) {
-        const expected = (0, EXPECTED_COLOR)('at least one assertion')
-        const received = (0, RECEIVED_COLOR)('received none')
+        const expected = (0, _jestMatcherUtils.EXPECTED_COLOR)(
+          'at least one assertion',
+        )
+        const received = (0, _jestMatcherUtils.RECEIVED_COLOR)('received none')
       }
 
       return result

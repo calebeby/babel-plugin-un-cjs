@@ -60,11 +60,11 @@ test('babel', async () => {
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {}
     import _template from '@babel/template'
-    import { version } from '../package.json'
+    import * as _package from '../package.json'
     export { Plugin }
     _default.Plugin = Plugin
-    export { version }
-    _default.version = version
+    export const version = _package.version
+    _default.version = _package.version
     export { _template as template }
     _default.template = _template
 

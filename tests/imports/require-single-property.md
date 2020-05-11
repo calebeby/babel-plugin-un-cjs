@@ -42,6 +42,29 @@ const foo = 'dont override me'
 console.log(_foo)
 ```
 
+# (skip) Require single property, used in sub scope
+
+(not implemented)
+
+```js
+const s = 'dont override me'
+const foo = 'dont override me'
+const main = () => {
+  const s = require('file').foo
+}
+```
+
+to
+
+```js
+import { foo as _foo } from 'file'
+const s = 'dont override me'
+const foo = 'dont override me'
+const main = () => {
+  const s = _foo
+}
+```
+
 # Require Single Property Within Destructuring
 
 ```js

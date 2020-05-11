@@ -1,4 +1,4 @@
-# (skip) Converts top-level require into namespace imports
+# Converts top-level require into namespace imports
 
 ```js
 const myModule = require('my-module')
@@ -11,7 +11,6 @@ to
 
 ```js
 import * as myModule from 'my-module'
-
 myModule.foo()
 myModule.bar()
 ```
@@ -29,11 +28,23 @@ myModule.bar()
 to
 
 ```js
-import _myModule from 'my-module'
+import myModule from 'my-module'
+myModule()
+myModule.foo()
+myModule.bar()
+```
 
-_myModule()
+# (skip) Uses default import if require result is used directly
 
-_myModule.foo()
+(not implemented yet)
 
-_myModule.bar()
+```js
+console.log(require('foo-bar'))
+```
+
+to
+
+```js
+import _1 from 'foo-bar'
+console.log(_1)
 ```

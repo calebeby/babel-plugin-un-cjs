@@ -25,18 +25,16 @@ module.exports = toRegex;
   expect(transformed).toMatchInlineSnapshot(`
     "'use strict'
 
-    import _safe from 'safe-regex'
-    import _extend from 'extend-shallow'
+    import safe from 'safe-regex'
+    import extend from 'extend-shallow'
 
     function toRegex(pattern, options) {
       return new RegExp(toRegex.create(pattern, options))
     }
 
     export const create = function (pattern, options) {
-      _extend(foo, bar)
-
-      _safe(blah)
-
+      extend(foo, bar)
+      safe(blah)
       return 'blah'
     }
     toRegex.create = create

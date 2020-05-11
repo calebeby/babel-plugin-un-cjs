@@ -80,7 +80,6 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const { scope } = path
   const binding = scope.getBinding(originalIdName)
   if (!binding) return
-  let importIds = new Map<string, t.Identifier>()
 
   // if we use foo.bar and foo directly, then we should _just_ import default
   const usesDefaultImport = binding.referencePaths.some((referencePath) => {
@@ -88,46 +87,19 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     return !t.isMemberExpression(referencePath.parent)
   })
 
-  const globalScope = scope.getProgramParent()
-
-  /** New identifier for the top-level object */
-  const newDefaultId = generateIdentifier(globalScope, originalIdName)
-
-  if (usesDefaultImport) {
-    // rename all instances of foo.bar to _foo.bar foo to _foo
-    binding.referencePaths.forEach((referencePath) => {
-      // I think this should always be true afaik but just to make sure
-      if (
-        t.isIdentifier(referencePath.node) &&
-        referencePath.node.name === originalIdName
-      )
-        referencePath.replaceWith(newDefaultId)
-    })
-  } else {
-    // not using foo directly, only properties like foo.bar and foo.baz
-    // loop through all the references and generate ids for them
-    // we will be importing them as {_bar, _baz}
-    // change the references to _bar and _baz
-    binding.referencePaths.forEach((referencePath) => {
-      const memberExpressionNode = referencePath.parent
-      const memberExpressionPath = referencePath.parentPath
-      if (!t.isMemberExpression(memberExpressionNode)) return
-      const propertyNode = memberExpressionNode.property
-      if (!t.isIdentifier(propertyNode)) return
-      const propName = propertyNode.name
-      const newId =
-        importIds.get(propName) || generateIdentifier(globalScope, propName)
-      importIds.set(propName, newId)
-      memberExpressionPath.replaceWith(newId)
-    })
-  }
+  // const foo = require('bar')
+  // Two possible situations here:
+  // 1. Never using foo directly, only properties like foo.bar and foo.baz:
+  //    -> import * as foo from 'bar'
+  // 2. Uses foo directly, and may additionally use properties
+  //    -> import foo from 'bar'
+  //    To ponder: Should a second import (namespace import) be created for the properties?
+  //    How do we know if something is meant to be a property of the default export vs a separate export?
 
   const newImport = t.importDeclaration(
     usesDefaultImport
-      ? [t.importDefaultSpecifier(newDefaultId)]
-      : Array.from(importIds.entries()).map(([key, id]) =>
-          t.importSpecifier(id, t.identifier(key)),
-        ),
+      ? [t.importDefaultSpecifier(originalId.node)]
+      : [t.importNamespaceSpecifier(originalId.node)],
     importString,
   )
   path.parentPath.remove()

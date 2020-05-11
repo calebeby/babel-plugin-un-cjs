@@ -17,8 +17,8 @@ console.log(_parser().tokTypes)
 
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "import { tokTypes } from '@babel/parser'
-    console.log(tokTypes)
+    "import * as _parser from '@babel/parser'
+    console.log(_parser.tokTypes)
     "
   `)
 })
@@ -32,11 +32,9 @@ foo()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import _foo from 'bar'
-
-      _foo.bar()
-
-      _foo()
+      "import foo from 'bar'
+      foo.bar()
+      foo()
       "
     `)
   })
@@ -49,9 +47,9 @@ foo.baz()
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "import { bar, baz } from 'bar'
-      bar()
-      baz()
+      "import * as foo from 'bar'
+      foo.bar()
+      foo.baz()
       "
     `)
   })
