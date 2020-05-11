@@ -1,22 +1,62 @@
 import { types as t, NodePath } from '@babel/core'
-import { getRequirePath, generateIdentifier, getProgramBody } from '../helpers'
+import {
+  getRequirePath,
+  generateIdentifier,
+  getProgramPath,
+  getProgramBody,
+} from '../helpers'
 
+/**
+ * Deprecated, plz migrate to injectImportIntoBody
+ */
 const injectImport = (path: NodePath, newImport: t.ImportDeclaration) => {
-  const programBody = getProgramBody(path)
-  const newImportPath = programBody.insertBefore([newImport])[0] as NodePath<
-    typeof newImport
+  const programPath = getProgramPath(path)
+  programPath.unshiftContainer('body', newImport)
+  const newImportPath = programPath.get('body.0') as NodePath<
+    t.ImportDeclaration
   >
-  programBody.scope.registerDeclaration(newImportPath)
+  programPath.scope.registerDeclaration(newImportPath)
 }
 
-export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
+const injectImportIntoBody = (
+  programPath: NodePath<t.Program>,
+  newImport: t.ImportDeclaration,
+) => {
+  const body = programPath.get('body')
+  const existingImports = body.filter((p) => p.isImportDeclaration())
+  if (existingImports.length === 0) {
+    programPath.unshiftContainer('body', newImport)
+  } else {
+    existingImports[existingImports.length - 1].insertAfter(newImport)
+  }
+  return programPath.get('body').find((p) => p.node === newImport) as NodePath<
+    t.ImportDeclaration
+  >
+}
+
+export const handleRequire = (path: NodePath<t.CallExpression>) => {
   const { node } = path
   const importString = getRequirePath(node)
   if (!importString) return
-  if (path.parentPath.isMemberExpression()) {
+  const parentPath = path.parentPath
+  const programPath = getProgramPath(path)
+  if (parentPath.isExpressionStatement()) {
+    // require('asdf') (side effects import only)
+    const expressionStatement = parentPath
+    const newImport = t.importDeclaration([], importString)
+    if (expressionStatement.parentPath.isProgram()) {
+      expressionStatement.replaceWith(newImport)
+    } else {
+      injectImportIntoBody(programPath, newImport).type
+      expressionStatement.remove()
+    }
+
+    return
+  }
+  if (parentPath.isMemberExpression()) {
     // handling require('asdf').foo
     // transforms to import {foo} from 'asdf' and replace expression with foo
-    const memberExp = path.parentPath
+    const memberExp = parentPath
     if (!t.isIdentifier(memberExp.node.property)) return
     const importId = memberExp.node.property
     if (
@@ -25,6 +65,9 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     ) {
       // special case: handling const asdf = require('asdf').foo
       // transforms to import {foo as asdf} from 'asdf'
+      // If the variable declaration was in a scope that was not the root scope
+      // Then it checks to make sure that the asdf name is available in the root scope
+      // If not, it finds another name and updates the references
       // MAKE SURE to _not_ handle const {asdf} = require('asdf').foo
       const newImport = t.importDeclaration(
         [t.importSpecifier(memberExp.parentPath.node.id, importId)],
@@ -46,17 +89,21 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
     memberExp.replaceWith(localId)
     return
   }
-  const parentPath = path.parentPath
-  if (parentPath.isExpressionStatement()) {
-    // require('asdf') (side effects import only)
-    parentPath.replaceWith(t.importDeclaration([], importString))
-    return
-  }
-  if (!parentPath.isVariableDeclarator()) {
-    // handling cases where require statement is within another expression
+  if (
+    !parentPath.isVariableDeclarator() ||
+    // variable is not in root scope
+    path.scope.getProgramParent() !== path.scope
+  ) {
+    // Handling cases where require statement is within another expression
     // console.log(require('foo'))
     // Becomes
     // import foo from 'foo'; console.log(foo)
+    //
+    // Also handling cases where require statement is within variable, but variable is not top-level
+    // () => { const foo = require('bar') }
+    // Becomes
+    // import bar from 'bar'; () => { const foo = bar }
+
     const id = generateIdentifier(
       path.scope,
       importString.value.replace(/[^a-zA-Z]/g, ''),
@@ -97,23 +144,25 @@ export const handleNamedImport = (path: NodePath<t.CallExpression>) => {
   const binding = scope.getBinding(originalIdName)
   if (!binding) return
 
-  // if we use foo.bar and foo directly, then we should _just_ import default
-  const usesDefaultImport = binding.referencePaths.some((referencePath) => {
-    // at least one of the references is foo directly instead of a property
-    return !t.isMemberExpression(referencePath.parent)
-  })
-
   // const foo = require('bar')
   // Two possible situations here:
   // 1. Never using foo directly, only properties like foo.bar and foo.baz:
   //    -> import * as foo from 'bar'
-  // 2. Uses foo directly, and may additionally use properties
+  // 2. Uses foo directly, and may additionally use properties (or foo is not used at all, directly or on a sub-property)
   //    -> import foo from 'bar'
   //    To ponder: Should a second import (namespace import) be created for the properties?
   //    How do we know if something is meant to be a property of the default export vs a separate export?
 
+  const useDefault =
+    binding.referencePaths.length === 0 ||
+    binding.referencePaths.some(
+      (referencePath) =>
+        // at least one of the references is foo directly instead of a property
+        !t.isMemberExpression(referencePath.parent),
+    )
+
   const newImport = t.importDeclaration(
-    usesDefaultImport
+    useDefault
       ? [t.importDefaultSpecifier(originalId.node)]
       : [t.importNamespaceSpecifier(originalId.node)],
     importString,

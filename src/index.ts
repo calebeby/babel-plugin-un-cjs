@@ -2,7 +2,7 @@ import { declare } from '@babel/helper-plugin-utils'
 import { types as t, NodePath, Visitor } from '@babel/core'
 import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
-import { handleNamedImport } from './imports/handleNamedImport'
+import { handleRequire } from './imports/handleRequire'
 import { handleWildcardImport } from './imports/handleWildcardImport'
 import {
   pathsToRemove,
@@ -92,7 +92,7 @@ export default declare((api) => {
       ) {
         handleWildcardImport(path)
       } else if (node.callee.name === 'require') {
-        handleNamedImport(path)
+        handleRequire(path)
       }
     },
 

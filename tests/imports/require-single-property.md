@@ -38,9 +38,7 @@ const foo = 'dont override me'
 console.log(_foo)
 ```
 
-# (skip) Require single property, used in sub scope
-
-(not implemented)
+# Require single property, used in sub scope
 
 ```js
 const s = 'dont override me'
@@ -56,6 +54,7 @@ to
 import { foo as _foo } from 'file'
 const s = 'dont override me'
 const foo = 'dont override me'
+
 const main = () => {
   const s = _foo
 }
