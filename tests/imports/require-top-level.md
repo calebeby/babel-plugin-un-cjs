@@ -15,7 +15,7 @@ myModule.foo()
 myModule.bar()
 ```
 
-Works even when require is in sub scope:
+# (only) Creates namespace import even when require is in sub scope:
 
 // TODO: Fix this test case
 // needs to generate free name in top scope

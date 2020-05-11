@@ -5,6 +5,7 @@ import * as prettier from 'prettier'
 const transform = async (inputCode: string) => {
   const result = await babelTransform(inputCode, {
     plugins: [babelPlugin],
+    parserOpts: { plugins: ['jsx'] },
     configFile: false,
   })
   return prettier.format(result.code, {

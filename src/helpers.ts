@@ -27,10 +27,18 @@ export const getProgramBody = (path: NodePath<unknown>) =>
 
 const reserved = ['default', 'super', 'import']
 
-export const generateIdentifier = (scope: Scope, name: string) =>
-  scope.hasBinding(name) || reserved.includes(name)
-    ? scope.generateUidIdentifier(name)
-    : t.identifier(name)
+export const generateIdentifier = (
+  scope: Scope,
+  preferredId: string | t.Identifier,
+) => {
+  const name: string =
+    typeof preferredId === 'string' ? preferredId : preferredId.name
+  if (scope.hasBinding(name) || reserved.includes(name))
+    return scope.generateUidIdentifier(name)
+  else {
+    return typeof preferredId === 'string' ? t.identifier(name) : preferredId
+  }
+}
 
 /** Object.assign but for maps */
 export const assignMaps = <Key, Val>(

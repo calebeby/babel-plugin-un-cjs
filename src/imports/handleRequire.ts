@@ -1,10 +1,5 @@
 import { types as t, NodePath } from '@babel/core'
-import {
-  getRequirePath,
-  generateIdentifier,
-  getProgramPath,
-  getProgramBody,
-} from '../helpers'
+import { getRequirePath, generateIdentifier, getProgramPath } from '../helpers'
 
 /**
  * Deprecated, plz migrate to injectImportIntoBody
@@ -38,27 +33,27 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   const { node } = path
   const importString = getRequirePath(node)
   if (!importString) return
-  const parentPath = path.parentPath
-  const programPath = getProgramPath(path)
-  if (parentPath.isExpressionStatement()) {
+  const parent = path.parentPath
+  const program = getProgramPath(path)
+  if (parent.isExpressionStatement()) {
     // require('asdf') (side effects import only)
-    const expressionStatement = parentPath
+    const expressionStatement = parent
     const newImport = t.importDeclaration([], importString)
     if (expressionStatement.parentPath.isProgram()) {
       expressionStatement.replaceWith(newImport)
     } else {
-      injectImportIntoBody(programPath, newImport).type
+      injectImportIntoBody(program, newImport).type
       expressionStatement.remove()
     }
 
     return
   }
-  if (parentPath.isMemberExpression()) {
+  if (parent.isMemberExpression() && t.isIdentifier(parent.node.property)) {
     // handling require('asdf').foo
     // transforms to import {foo} from 'asdf' and replace expression with foo
-    const memberExp = parentPath
-    if (!t.isIdentifier(memberExp.node.property)) return
-    const importId = memberExp.node.property
+    const memberExp = parent
+    /** .foo */
+    const importedId = parent.node.property
     if (
       memberExp.parentPath.isVariableDeclarator() &&
       t.isIdentifier(memberExp.parentPath.node.id)
@@ -69,20 +64,36 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       // Then it checks to make sure that the asdf name is available in the root scope
       // If not, it finds another name and updates the references
       // MAKE SURE to _not_ handle const {asdf} = require('asdf').foo
+      const originalId = memberExp.parentPath.node.id
+      const variableDeclarator = memberExp.parentPath
+      const originalBinding = variableDeclarator.scope.getBinding(
+        originalId.name,
+      )
+      if (!originalBinding) return
+      const references = originalBinding.referencePaths
+      variableDeclarator.scope.removeBinding(originalId.name)
+      const localId = generateIdentifier(program.scope, originalId)
       const newImport = t.importDeclaration(
-        [t.importSpecifier(memberExp.parentPath.node.id, importId)],
+        [t.importSpecifier(localId, importedId)],
         importString,
       )
-      injectImport(path, newImport)
-      memberExp.parentPath.remove()
+      variableDeclarator.remove()
+      const importPath = injectImportIntoBody(program, newImport)
+      program.scope.registerDeclaration(importPath)
+      const newBinding = program.scope.getBinding(localId.name)
+      if (!newBinding) return
+      references.forEach((p) => {
+        // isReferencedIdentifier will be true for both Identifiers and JSXIdentifiers
+        if (!p.isReferencedIdentifier()) return
+        p.node.name = localId.name
+        // @ts-ignore
+        newBinding.reference(p)
+      })
       return
     }
-    const localId = generateIdentifier(
-      path.scope.getProgramParent(),
-      importId.name,
-    )
+    const localId = generateIdentifier(program.scope, importedId)
     const newImport = t.importDeclaration(
-      [t.importSpecifier(localId, importId)],
+      [t.importSpecifier(localId, importedId)],
       importString,
     )
     injectImport(path, newImport)
@@ -90,7 +101,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     return
   }
   if (
-    !parentPath.isVariableDeclarator() ||
+    !parent.isVariableDeclarator() ||
     // variable is not in root scope
     path.scope.getProgramParent() !== path.scope
   ) {
@@ -116,7 +127,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     path.replaceWith(id)
     return
   }
-  const variableDeclarator = parentPath
+  const variableDeclarator = parent
   // const foo = require('asdf')
   const originalId = variableDeclarator.get('id')
   if (originalId.isObjectPattern()) {
