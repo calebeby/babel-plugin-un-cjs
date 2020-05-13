@@ -129,3 +129,11 @@ export const updateReferencesTo = (
 
 export const isDefaultImportHelper = (name: string) =>
   name.match(/interopRequireDefault/) || name === '__importDefault'
+
+export const isNamespaceImportHelper = (name: string) =>
+  name.match(/interopRequireWildcard/) || name === '__importStar'
+
+export const isImportHelper = (name: string) =>
+  isDefaultImportHelper(name) ||
+  isNamespaceImportHelper(name) ||
+  name.match(/getRequireWildcardCache/)

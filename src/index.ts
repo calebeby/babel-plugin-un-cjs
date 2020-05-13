@@ -10,6 +10,8 @@ import {
   isModuleExports,
   isStillInTree,
   isDefaultImportHelper,
+  isNamespaceImportHelper,
+  isImportHelper,
 } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
@@ -85,10 +87,7 @@ const babelPluginUnCjs = declare((api) => {
       }
       if (isDefaultImportHelper(node.callee.name)) {
         handleDefaultImport(path)
-      } else if (
-        node.callee.name.match(/interopRequireWildcard/) ||
-        node.callee.name === '__importStar'
-      ) {
+      } else if (isNamespaceImportHelper(node.callee.name)) {
         handleWildcardImport(path)
       } else if (node.callee.name === 'require') {
         handleRequire(path)
@@ -128,16 +127,13 @@ const babelPluginUnCjs = declare((api) => {
     },
 
     VariableDeclarator(path) {
-      if (
-        t.isIdentifier(path.node.id) &&
-        isDefaultImportHelper(path.node.id.name)
-      ) {
+      if (t.isIdentifier(path.node.id) && isImportHelper(path.node.id.name)) {
         path.remove()
       }
     },
 
     FunctionDeclaration(path) {
-      if (path.node.id && isDefaultImportHelper(path.node.id.name)) {
+      if (path.node.id && isImportHelper(path.node.id.name)) {
         path.remove()
         return
       }
