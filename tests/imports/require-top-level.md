@@ -175,25 +175,25 @@ const { foo, ...rest } = module
 # (skip) Require with dynamic property
 
 ```js
-const { foo, ...rest } = require('module')
+const { foo, [asdf()]: a } = require('module')
 ```
 
 to
 
 ```js
 import * as module from 'module'
-const { foo, ...rest } = module
+const { foo, [asdf()]: a } = module
 ```
 
-# (skip) Require with destructuring
+# Require with array destructuring
 
 ```js
-const { foo, ...rest } = require('module')
+const [a, b, c] = require('module')
 ```
 
 to
 
 ```js
-import * as module from 'module'
-const { foo, ...rest } = module
+import module from 'module'
+const [a, b, c] = module
 ```

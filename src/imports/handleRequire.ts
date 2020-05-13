@@ -70,21 +70,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     return
   }
   if (!parent.isVariableDeclarator()) {
-    // Handling cases where require statement is within another expression
-    // console.log(require('foo'))
-    // Becomes
-    // import foo from 'foo'; console.log(foo)
-
-    const id = generateIdentifier(
-      path.scope,
-      importString.value.replace(/[^a-zA-Z]/g, ''),
-    )
-    const newImport = t.importDeclaration(
-      [t.importDefaultSpecifier(id)],
-      importString,
-    )
-    injectImportIntoBody(program, newImport)
-    path.replaceWith(id)
+    hoistInlineRequireDefault(path, importString)
     return
   }
   const variableDeclarator = parent
@@ -129,7 +115,10 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     variableDeclarator.remove()
     return
   }
-  if (!t.isIdentifier(originalId)) return
+  if (!t.isIdentifier(originalId)) {
+    hoistInlineRequireDefault(path, importString)
+    return
+  }
 
   // const foo = require('bar')
   // Two possible situations here:
@@ -163,4 +152,35 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   )
   injectImportIntoBody(program, newImport)
   updateReferencesTo(references, localId)
+}
+
+/**
+ * Hoists an inline require up to an import and replaces where the variable was with the auto-generated variable name
+ * @example
+ * console.log(require('hi'))
+ * // transforms to:
+ * import hi from 'hi'
+ * console.log(hi)
+ *
+ * @param path Require call
+ */
+const hoistInlineRequireDefault = (
+  path: NodePath<t.CallExpression>,
+  importString: t.StringLiteral,
+) => {
+  // Handling cases where require statement is within another expression
+  // console.log(require('foo'))
+  // Becomes
+  // import foo from 'foo'; console.log(foo)
+
+  const id = generateIdentifier(
+    path.scope,
+    importString.value.replace(/[^a-zA-Z]/g, ''),
+  )
+  const newImport = t.importDeclaration(
+    [t.importDefaultSpecifier(id)],
+    importString,
+  )
+  injectImportIntoBody(getProgramPath(path), newImport)
+  path.replaceWith(id)
 }
