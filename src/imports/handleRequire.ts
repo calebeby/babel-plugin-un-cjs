@@ -62,7 +62,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       if (!originalBinding) return
       const references = originalBinding.referencePaths
       variableDeclarator.scope.removeBinding(originalId.name)
-      const localId = generateIdentifier(program.scope, originalId)
+      const localId = generateIdentifier(path.scope, originalId)
       const newImport = t.importDeclaration(
         [t.importSpecifier(localId, importedId)],
         importString,
@@ -72,7 +72,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       updateReferencesTo(references, localId)
       return
     }
-    const localId = generateIdentifier(program.scope, importedId)
+    const localId = generateIdentifier(path.scope, importedId)
     const newImport = t.importDeclaration(
       [t.importSpecifier(localId, importedId)],
       importString,
@@ -88,7 +88,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     // import foo from 'foo'; console.log(foo)
 
     const id = generateIdentifier(
-      program.scope,
+      path.scope,
       importString.value.replace(/[^a-zA-Z]/g, ''),
     )
     const newImport = t.importDeclaration(
@@ -126,10 +126,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       )
       if (!originalBinding) continue
       variableDeclarator.scope.removeBinding(originalLocalId.name)
-      const newLocalId = generateIdentifier(
-        variableDeclarator.scope,
-        originalLocalId,
-      )
+      const newLocalId = generateIdentifier(path.scope, originalLocalId)
       references.add({
         newId: newLocalId,
         references: originalBinding.referencePaths,
@@ -145,12 +142,6 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     return
   }
   if (!t.isIdentifier(originalId)) return
-  const originalBinding = path.scope.getBinding(originalId.name)
-  if (!originalBinding) return
-  const references = originalBinding.referencePaths
-  path.scope.removeBinding(originalId.name)
-  const localId = generateIdentifier(program.scope, originalId)
-  path.parentPath.remove()
 
   // const foo = require('bar')
   // Two possible situations here:
@@ -160,6 +151,13 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   //    -> import foo from 'bar'
   //    To ponder: Should a second import (namespace import) be created for the properties?
   //    How do we know if something is meant to be a property of the default export vs a separate export?
+
+  const originalBinding = path.scope.getBinding(originalId.name)
+  if (!originalBinding) return
+  const references = originalBinding.referencePaths
+  path.scope.removeBinding(originalId.name)
+  const localId = generateIdentifier(path.scope, originalId)
+  path.parentPath.remove()
 
   const useDefault =
     references.length === 0 ||
