@@ -23,8 +23,9 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   const originalBinding = variableDeclarator.scope.getBinding(originalId.name)
   if (!originalBinding) return
   const references = originalBinding.referencePaths
-  variableDeclarator.remove()
+  variableDeclarator.scope.removeBinding(originalId.name)
   const newId = generateIdentifier(variableDeclarator.scope, originalId)
+  variableDeclarator.remove()
   const program = getProgramPath(path)
 
   const newImport = t.importDeclaration(

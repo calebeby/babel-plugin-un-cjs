@@ -67,7 +67,6 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
         [t.importSpecifier(localId, importedId)],
         importString,
       )
-      // TODO: see if i can move this above localId and get rid of removeBinding
       variableDeclarator.remove()
       const importPath = injectImportIntoBody(program, newImport)
       program.scope.registerDeclaration(importPath)
@@ -140,8 +139,9 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   const originalBinding = path.scope.getBinding(originalId.name)
   if (!originalBinding) return
   const references = originalBinding.referencePaths
-  path.parentPath.remove()
+  path.scope.removeBinding(originalId.name)
   const localId = generateIdentifier(program.scope, originalId)
+  path.parentPath.remove()
 
   // const foo = require('bar')
   // Two possible situations here:
