@@ -105,9 +105,11 @@ export const injectImportIntoBody = (
   } else {
     existingImports[existingImports.length - 1].insertAfter(newImport)
   }
-  return programPath.get('body').find((p) => p.node === newImport) as NodePath<
-    t.ImportDeclaration
-  >
+  const importPath = programPath
+    .get('body')
+    .find((p) => p.node === newImport) as NodePath<t.ImportDeclaration>
+  importPath.scope.registerDeclaration(importPath)
+  return importPath
 }
 
 export const updateReferencesTo = (

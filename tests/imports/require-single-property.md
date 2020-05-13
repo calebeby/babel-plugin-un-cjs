@@ -83,6 +83,48 @@ const s = () => {
 }
 ```
 
+# Require single property by destructuring
+
+```js
+const { asdf } = require('module')
+asdf()
+```
+
+to
+
+```js
+import { asdf } from 'module'
+asdf()
+```
+
+# Require single property by destructuring, in sub scope
+
+```js
+const asdf = 'dont override me'
+const a = 'dont override me'
+
+while (asdf) {
+  const { asdf, b: a } = require('module')
+  asdf()
+
+  a.foo()
+}
+```
+
+to
+
+```js
+import { asdf as _asdf, b as _a } from 'module'
+const asdf = 'dont override me'
+const a = 'dont override me'
+
+while (asdf) {
+  _asdf()
+
+  _a.foo()
+}
+```
+
 # Require Single Property Within Destructuring
 
 ```js
@@ -100,7 +142,10 @@ And it makes sure that existing variables don't get overridden:
 
 ```js
 const foo = 'dont override me'
-const { asdf } = require('file').foo
+
+if (foo) {
+  const { asdf } = require('file').foo
+}
 ```
 
 to
@@ -108,7 +153,10 @@ to
 ```js
 import { foo as _foo } from 'file'
 const foo = 'dont override me'
-const { asdf } = _foo
+
+if (foo) {
+  const { asdf } = _foo
+}
 ```
 
 # (skip) Require with destructuring and rest/spread

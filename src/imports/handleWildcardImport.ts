@@ -33,6 +33,5 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
     importPath,
   )
   const importNodePath = injectImportIntoBody(program, newImport)
-  program.scope.registerDeclaration(importNodePath)
   updateReferencesTo(references, newId)
 }

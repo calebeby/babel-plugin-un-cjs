@@ -69,16 +69,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       )
       variableDeclarator.remove()
       const importPath = injectImportIntoBody(program, newImport)
-      program.scope.registerDeclaration(importPath)
-      const newBinding = program.scope.getBinding(localId.name)
-      if (!newBinding) return
-      references.forEach((p) => {
-        // isReferencedIdentifier will be true for both Identifiers and JSXIdentifiers
-        if (!p.isReferencedIdentifier()) return
-        p.node.name = localId.name
-        // @ts-ignore
-        newBinding.reference(p)
-      })
+      updateReferencesTo(references, localId)
       return
     }
     const localId = generateIdentifier(program.scope, importedId)
@@ -117,22 +108,45 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   // const foo = require('asdf')
   const originalId = variableDeclarator.node.id
   if (t.isObjectPattern(originalId)) {
-    // Handling:
+    // Handling destructured require:
     // const { a, foo: bar } = require("....")
-    const importSpecifiers: t.ImportSpecifier[] = originalId.properties
-      .map((prop) => {
-        // ignore rest/spread, can't do that
-        // Potentially in the future we can handle rest/spread with namespace import
-        if (!t.isObjectProperty(prop)) return
-        const local = prop.value
-        const imported = prop.key
-        if (!t.isIdentifier(local)) return
-        return t.importSpecifier(local, imported)
+
+    const importSpecifiers: t.ImportSpecifier[] = []
+    // Stores all of the references to each specifier
+    const references = new Set<{
+      newId: t.Identifier
+      references: NodePath<t.Node>[]
+    }>()
+
+    for (const prop of originalId.properties) {
+      if (!t.isObjectProperty(prop)) return
+      // ignore rest element, can't do that
+      // Potentially in the future we can handle rest/spread with namespace import
+      const originalLocalId = prop.value
+      const importedId = prop.key
+      if (!t.isIdentifier(originalLocalId) || !t.isIdentifier(importedId))
+        return
+      const originalBinding = variableDeclarator.scope.getBinding(
+        originalLocalId.name,
+      )
+      if (!originalBinding) continue
+      variableDeclarator.scope.removeBinding(originalLocalId.name)
+      const newLocalId = generateIdentifier(
+        variableDeclarator.scope,
+        originalLocalId,
+      )
+      references.add({
+        newId: newLocalId,
+        references: originalBinding.referencePaths,
       })
-      .filter((v): v is t.ImportSpecifier => t.isImportSpecifier(v))
+      importSpecifiers.push(t.importSpecifier(newLocalId, importedId))
+    }
     const newImport = t.importDeclaration(importSpecifiers, importString)
-    injectImport(path, newImport)
-    path.parentPath.remove()
+    injectImportIntoBody(program, newImport)
+    references.forEach(({ newId, references }) => {
+      updateReferencesTo(references, newId)
+    })
+    variableDeclarator.remove()
     return
   }
   if (!t.isIdentifier(originalId)) return
@@ -167,6 +181,5 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     importString,
   )
   const importPath = injectImportIntoBody(program, newImport)
-  program.scope.registerDeclaration(importPath)
   updateReferencesTo(references, localId)
 }
