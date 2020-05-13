@@ -7,18 +7,6 @@ import {
   updateReferencesTo,
 } from '../helpers'
 
-/**
- * Deprecated, plz migrate to injectImportIntoBody
- */
-const injectImport = (path: NodePath, newImport: t.ImportDeclaration) => {
-  const programPath = getProgramPath(path)
-  programPath.unshiftContainer('body', newImport)
-  const newImportPath = programPath.get('body.0') as NodePath<
-    t.ImportDeclaration
-  >
-  programPath.scope.registerDeclaration(newImportPath)
-}
-
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
   const { node } = path
   const importString = getRequirePath(node)
@@ -77,7 +65,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       [t.importSpecifier(localId, importedId)],
       importString,
     )
-    injectImport(path, newImport)
+    injectImportIntoBody(program, newImport)
     memberExp.replaceWith(localId)
     return
   }
