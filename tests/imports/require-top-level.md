@@ -15,7 +15,7 @@ myModule.foo()
 myModule.bar()
 ```
 
-# (only) Creates namespace import even when require is in sub scope:
+# Creates namespace import even when require is in sub scope:
 
 // TODO: Fix this test case
 // needs to generate free name in top scope
@@ -24,9 +24,12 @@ myModule.bar()
 // Also check similar scenario for: default import, single property import, destructure import
 
 ```js
-;() => {
+const myModule = 'dont override me'
+
+if (myModule) {
   const myModule = require('my-module')
   myModule.foo()
+
   myModule.bar()
 }
 ```
@@ -34,10 +37,13 @@ myModule.bar()
 to
 
 ```js
-import * as myModule from 'my-module'
-;() => {
-  myModule.foo()
-  myModule.bar()
+import * as _myModule from 'my-module'
+const myModule = 'dont override me'
+
+if (myModule) {
+  _myModule.foo()
+
+  _myModule.bar()
 }
 ```
 
@@ -67,18 +73,19 @@ const s = 'dont override me'
 const file = 'dont override me'
 const main = () => {
   const s = require('file')
+  s()
 }
 ```
 
 to
 
 ```js
-import _file from 'file'
+import _s from 'file'
 const s = 'dont override me'
 const file = 'dont override me'
 
 const main = () => {
-  const s = _file
+  _s()
 }
 ```
 

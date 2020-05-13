@@ -22,8 +22,10 @@ const S = 'dont override me'
 const main = () => {
   const S = require('file').foo
   S.asdf()
+
   console.log(<S>Hi</S>)
 }
+
 const other = () => {
   S.asdf()
 }
@@ -107,4 +109,19 @@ to
 import { foo as _foo } from 'file'
 const foo = 'dont override me'
 const { asdf } = _foo
+```
+
+# (skip) Require with destructuring and rest/spread
+
+(not implemented, low priority)
+
+```js
+const { foo, ...rest } = require('module')
+```
+
+to
+
+```js
+import * as module from 'module'
+const { foo, ...rest } = module
 ```

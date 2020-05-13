@@ -25,8 +25,8 @@ module.exports = toRegex;
   expect(transformed).toMatchInlineSnapshot(`
     "'use strict'
 
-    import safe from 'safe-regex'
     import extend from 'extend-shallow'
+    import safe from 'safe-regex'
 
     function toRegex(pattern, options) {
       return new RegExp(toRegex.create(pattern, options))

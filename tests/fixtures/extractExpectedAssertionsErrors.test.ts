@@ -49,8 +49,8 @@ exports.default = _default;
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default2 = {}
-    import * as _jestMatchersObject from './jestMatchersObject'
     import * as _jestMatcherUtils from 'jest-matcher-utils'
+    import * as _jestMatchersObject from './jestMatchersObject'
     _default2.default = void 0
 
     const resetAssertionsLocalState = () => {

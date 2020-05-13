@@ -93,3 +93,34 @@ export const isTopLevel = (path: NodePath) =>
  */
 export const isStillInTree = (path: NodePath) =>
   everyParent(path, (p) => !p.removed)
+
+export const injectImportIntoBody = (
+  programPath: NodePath<t.Program>,
+  newImport: t.ImportDeclaration,
+) => {
+  const body = programPath.get('body')
+  const existingImports = body.filter((p) => p.isImportDeclaration())
+  if (existingImports.length === 0) {
+    programPath.unshiftContainer('body', newImport)
+  } else {
+    existingImports[existingImports.length - 1].insertAfter(newImport)
+  }
+  return programPath.get('body').find((p) => p.node === newImport) as NodePath<
+    t.ImportDeclaration
+  >
+}
+
+export const updateReferencesTo = (
+  references: NodePath<t.Node>[],
+  newId: t.Identifier,
+) => {
+  references.forEach((p) => {
+    // isReferencedIdentifier will be true for both Identifiers and JSXIdentifiers
+    if (!p.isReferencedIdentifier()) return
+    p.node.name = newId.name
+    p.scope
+      .getBinding(newId.name)
+      // @ts-expect-error
+      ?.reference(p)
+  })
+}

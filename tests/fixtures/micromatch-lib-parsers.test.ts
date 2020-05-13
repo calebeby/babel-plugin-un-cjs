@@ -22,10 +22,10 @@ module.exports.sdf = function () {
 exports.asdf = nanomatch
 `
   expect(await transform(input)).toMatchInlineSnapshot(`
-    "import toRegex from 'to-regex'
-    import * as regexNot from 'regex-not'
+    "import * as extglob from 'extglob'
     import nanomatch from 'nanomatch'
-    import * as extglob from 'extglob'
+    import * as regexNot from 'regex-not'
+    import toRegex from 'to-regex'
 
     let _default = function (snapdragon) {
       console.log('nanomatch', nanomatch.parsers)

@@ -1,5 +1,11 @@
 import { types as t, NodePath } from '@babel/core'
-import { getRequirePath, generateIdentifier, getProgramPath } from '../helpers'
+import {
+  getRequirePath,
+  generateIdentifier,
+  getProgramPath,
+  injectImportIntoBody,
+  updateReferencesTo,
+} from '../helpers'
 
 /**
  * Deprecated, plz migrate to injectImportIntoBody
@@ -11,22 +17,6 @@ const injectImport = (path: NodePath, newImport: t.ImportDeclaration) => {
     t.ImportDeclaration
   >
   programPath.scope.registerDeclaration(newImportPath)
-}
-
-const injectImportIntoBody = (
-  programPath: NodePath<t.Program>,
-  newImport: t.ImportDeclaration,
-) => {
-  const body = programPath.get('body')
-  const existingImports = body.filter((p) => p.isImportDeclaration())
-  if (existingImports.length === 0) {
-    programPath.unshiftContainer('body', newImport)
-  } else {
-    existingImports[existingImports.length - 1].insertAfter(newImport)
-  }
-  return programPath.get('body').find((p) => p.node === newImport) as NodePath<
-    t.ImportDeclaration
-  >
 }
 
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
@@ -61,7 +51,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       // special case: handling const asdf = require('asdf').foo
       // transforms to import {foo as asdf} from 'asdf'
       // If the variable declaration was in a scope that was not the root scope
-      // Then it checks to make sure that the asdf name is available in the root scope
+      // Then it checks to make sure that the asdf name is available in this scope (and all above scopes)
       // If not, it finds another name and updates the references
       // MAKE SURE to _not_ handle const {asdf} = require('asdf').foo
       const originalId = memberExp.parentPath.node.id
@@ -77,6 +67,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
         [t.importSpecifier(localId, importedId)],
         importString,
       )
+      // TODO: see if i can move this above localId and get rid of removeBinding
       variableDeclarator.remove()
       const importPath = injectImportIntoBody(program, newImport)
       program.scope.registerDeclaration(importPath)
@@ -100,11 +91,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     memberExp.replaceWith(localId)
     return
   }
-  if (
-    !parent.isVariableDeclarator() ||
-    // variable is not in root scope
-    path.scope.getProgramParent() !== path.scope
-  ) {
+  if (!parent.isVariableDeclarator()) {
     // Handling cases where require statement is within another expression
     // console.log(require('foo'))
     // Becomes
@@ -116,7 +103,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     // import bar from 'bar'; () => { const foo = bar }
 
     const id = generateIdentifier(
-      path.scope,
+      program.scope,
       importString.value.replace(/[^a-zA-Z]/g, ''),
     )
     const newImport = t.importDeclaration(
@@ -129,11 +116,11 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   }
   const variableDeclarator = parent
   // const foo = require('asdf')
-  const originalId = variableDeclarator.get('id')
-  if (originalId.isObjectPattern()) {
+  const originalId = variableDeclarator.node.id
+  if (t.isObjectPattern(originalId)) {
     // Handling:
     // const { a, foo: bar } = require("....")
-    const importSpecifiers: t.ImportSpecifier[] = originalId.node.properties
+    const importSpecifiers: t.ImportSpecifier[] = originalId.properties
       .map((prop) => {
         // ignore rest/spread, can't do that
         // Potentially in the future we can handle rest/spread with namespace import
@@ -149,11 +136,12 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     path.parentPath.remove()
     return
   }
-  if (!originalId.isIdentifier()) return
-  const originalIdName = originalId.node.name
-  const { scope } = path
-  const binding = scope.getBinding(originalIdName)
-  if (!binding) return
+  if (!t.isIdentifier(originalId)) return
+  const originalBinding = path.scope.getBinding(originalId.name)
+  if (!originalBinding) return
+  const references = originalBinding.referencePaths
+  path.parentPath.remove()
+  const localId = generateIdentifier(program.scope, originalId)
 
   // const foo = require('bar')
   // Two possible situations here:
@@ -165,8 +153,8 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   //    How do we know if something is meant to be a property of the default export vs a separate export?
 
   const useDefault =
-    binding.referencePaths.length === 0 ||
-    binding.referencePaths.some(
+    references.length === 0 ||
+    references.some(
       (referencePath) =>
         // at least one of the references is foo directly instead of a property
         !t.isMemberExpression(referencePath.parent),
@@ -174,10 +162,11 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
 
   const newImport = t.importDeclaration(
     useDefault
-      ? [t.importDefaultSpecifier(originalId.node)]
-      : [t.importNamespaceSpecifier(originalId.node)],
+      ? [t.importDefaultSpecifier(localId)]
+      : [t.importNamespaceSpecifier(localId)],
     importString,
   )
-  path.parentPath.remove()
-  injectImport(path, newImport)
+  const importPath = injectImportIntoBody(program, newImport)
+  program.scope.registerDeclaration(importPath)
+  updateReferencesTo(references, localId)
 }
