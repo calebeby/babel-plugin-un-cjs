@@ -37,7 +37,7 @@ export type ModulePathsToReplace = Set<
   NodePath<t.Identifier | t.MemberExpression>
 >
 
-export default declare((api) => {
+const babelPluginUnCjs = declare((api) => {
   api.assertVersion(7)
 
   const namedExports: NamedExportsMap = new Map()
@@ -157,3 +157,5 @@ export default declare((api) => {
 
   return { visitor }
 })
+
+export default babelPluginUnCjs
