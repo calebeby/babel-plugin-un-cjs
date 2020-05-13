@@ -18,6 +18,34 @@ console.log(_bar.bar)
 _bar.bar()
 ```
 
+# Transforms named import from babel with lazy: true
+
+```js
+'use strict'
+
+function _bar() {
+  const data = require('bar')
+
+  _bar = function () {
+    return data
+  }
+
+  return data
+}
+
+console.log(_bar().bar)
+;(0, _bar().bar)()
+```
+
+to
+
+```js
+import * as _bar from 'bar'
+console.log(_bar.bar)
+
+_bar.bar()
+```
+
 # Transforms named import from typescript
 
 ```js
