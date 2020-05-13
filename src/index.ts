@@ -50,7 +50,8 @@ const babelPluginUnCjs = declare((api) => {
       exit(programPath) {
         if (!bail) {
           Array.from(pathsToRemove.values()).forEach((p) => p.remove())
-          writeExports(programPath, modulePathsToReplace, namedExports)
+          if (namedExports.size !== 0)
+            writeExports(programPath, modulePathsToReplace, namedExports)
         }
 
         // reset state
@@ -111,6 +112,15 @@ const babelPluginUnCjs = declare((api) => {
     Directive(path) {
       // Since we are converting to ESM, the "use strict" directive is not needed
       if (path.node.value.value === 'use strict') path.remove()
+    },
+
+    VariableDeclarator(path) {
+      if (
+        t.isIdentifier(path.node.id) &&
+        isDefaultImportHelper(path.node.id.name)
+      ) {
+        path.remove()
+      }
     },
 
     FunctionDeclaration(path) {
