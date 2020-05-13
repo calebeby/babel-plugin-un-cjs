@@ -26,12 +26,11 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   variableDeclarator.scope.removeBinding(originalId.name)
   const newId = generateIdentifier(variableDeclarator.scope, originalId)
   variableDeclarator.remove()
-  const program = getProgramPath(path)
 
   const newImport = t.importDeclaration(
     [t.importNamespaceSpecifier(newId)],
     importPath,
   )
-  const importNodePath = injectImportIntoBody(program, newImport)
+  injectImportIntoBody(getProgramPath(path), newImport)
   updateReferencesTo(references, newId)
 }

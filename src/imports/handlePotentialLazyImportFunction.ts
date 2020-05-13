@@ -1,5 +1,5 @@
 import { types as t, NodePath } from '@babel/core'
-import { generateIdentifier } from './helpers'
+import { generateIdentifier } from '../helpers'
 
 export const handlePotentialLazyImportFunction = (
   path: NodePath<t.FunctionDeclaration>,
@@ -98,8 +98,7 @@ export const handlePotentialLazyImportFunction = (
     const parent = ref.parentPath
     if (!parent.isCallExpression()) return
     parent.replaceWith(newId)
-    newBinding.referencePaths.push(parent)
-    newBinding.references++
-    newBinding.referenced = true
+    // @ts-expect-error
+    newBinding.reference(parent)
   })
 }

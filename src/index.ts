@@ -15,7 +15,7 @@ import {
 } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
-import { handlePotentialLazyImportFunction } from './handlePotentialLazyImportFunction'
+import { handlePotentialLazyImportFunction } from './imports/handlePotentialLazyImportFunction'
 import { handlePotentialWildcardExport } from './exports/handlePotentialWildcardExport'
 
 /**
