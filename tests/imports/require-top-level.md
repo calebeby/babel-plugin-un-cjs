@@ -17,12 +17,6 @@ myModule.bar()
 
 # Creates namespace import even when require is in sub scope:
 
-// TODO: Fix this test case
-// needs to generate free name in top scope
-// and update references in the sub scope
-
-// Also check similar scenario for: default import, single property import, destructure import
-
 ```js
 const myModule = 'dont override me'
 
