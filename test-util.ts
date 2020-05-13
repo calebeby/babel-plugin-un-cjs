@@ -8,12 +8,15 @@ const transform = async (inputCode: string) => {
     parserOpts: { plugins: ['jsx'] },
     configFile: false,
   })
-  return prettier.format(result.code, {
+  const prettified = prettier.format(result.code, {
     parser: 'babel',
     singleQuote: true,
     semi: false,
     trailingComma: 'all',
   })
+
+  if (prettified === '') return '\n'
+  return prettified
 }
 
 export default transform

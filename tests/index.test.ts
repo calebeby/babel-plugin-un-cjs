@@ -1,26 +1,5 @@
 import transform from '../test-util'
 
-test('replaces global with window', async () => {
-  const input = `
-console.log(global.asdf)
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`
-    "console.log(window.asdf)
-    "
-  `)
-})
-
-test('removes __esModule', async () => {
-  const input = `
- Object.defineProperty(exports, '__esModule', {
-  value: true
-}); 
-`
-  const transformed = await transform(input)
-  expect(transformed).toMatchInlineSnapshot(`""`)
-})
-
 describe('handle export object', () => {
   test('handles Object.defineProperty on exports', async () => {
     const input = `
