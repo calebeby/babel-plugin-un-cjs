@@ -151,9 +151,7 @@ Object.keys(_waitFor).forEach(function (key) {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
-    export * from './wait-for'
-    export default _default
+    "export * from './wait-for'
     "
   `)
 })
@@ -175,9 +173,7 @@ Object.keys(_waitFor).forEach(function (key) {
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
-    export * from './wait-for'
-    export default _default
+    "export * from './wait-for'
     "
   `)
 })

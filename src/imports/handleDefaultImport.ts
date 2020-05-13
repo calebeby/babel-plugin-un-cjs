@@ -4,7 +4,6 @@ import {
   generateIdentifier,
   injectImportIntoBody,
   getProgramPath,
-  replaceBabelSequenceExpressionParent,
 } from '../helpers'
 
 export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
@@ -44,7 +43,7 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
           'Cannot read property from default export object',
         )
       }
-      replaceBabelSequenceExpressionParent(memberExpression, newImportId)
+      memberExpression.replaceWith(newImportId)
     } else {
       ref.replaceWith(
         t.objectExpression([

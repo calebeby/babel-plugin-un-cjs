@@ -5,7 +5,6 @@ import {
   getProgramPath,
   injectImportIntoBody,
   updateReferencesTo,
-  replaceBabelSequenceExpressionParent,
 } from '../helpers'
 
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
@@ -139,7 +138,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   //    To ponder: Should a second import (namespace import) be created for the properties?
   //    How do we know if something is meant to be a property of the default export vs a separate export?
   // 3. Every place where foo is used is foo.default. This is the output of babel transform commonjs with noInterop: true
-  //    -> import foo from 'bar
+  //    -> import foo from 'bar', and change all references from foo.default to foo
 
   const originalBinding = path.scope.getBinding(originalId.name)
   if (!originalBinding) return
@@ -175,7 +174,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   if (usesDefaultOnly) {
     references.forEach((ref) => {
       const memberExp = ref.parentPath
-      replaceBabelSequenceExpressionParent(memberExp, localId)
+      memberExp.replaceWith(localId)
     })
   } else {
     updateReferencesTo(references, localId)

@@ -95,6 +95,19 @@ const babelPluginUnCjs = declare((api) => {
       }
     },
 
+    SequenceExpression(path) {
+      //  Babel commonjs will transpile foo() to ;(0, _foo)()
+      //  Replaces (0, _foo) with _foo
+
+      const isLength2 = path.node.expressions.length === 2
+      const firstElement = path.node.expressions[0]
+      const secondElement = path.node.expressions[1]
+      if (isLength2 && t.isLiteral(firstElement)) {
+        path.replaceWith(secondElement)
+        return
+      }
+    },
+
     Identifier(path) {
       if (path.node.name === 'exports') {
         const parent = path.parentPath

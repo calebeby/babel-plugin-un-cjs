@@ -126,7 +126,7 @@ test('babel', async () => {
 
     class OptionManager {
       init(opts) {
-        return (0, _config.loadOptions)(opts)
+        return _config.loadOptions(opts)
       }
     }
 
