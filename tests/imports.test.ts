@@ -64,7 +64,9 @@ console.log(_hi.default);
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "import _hi from 'hi'
-    ;(0, _hi)()
+
+    _hi()
+
     console.log(_hi)
     "
   `)
@@ -85,7 +87,8 @@ const foo = () => {
     const _hi = 'hi'
 
     const foo = () => {
-      ;(0, _hi2)()
+      _hi2()
+
       console.log(_hi2)
     }
     "
@@ -105,7 +108,8 @@ const foo = () => {
     "import _hi from 'hi'
 
     const foo = () => {
-      ;(0, _hi)()
+      _hi()
+
       console.log(_hi)
     }
     "

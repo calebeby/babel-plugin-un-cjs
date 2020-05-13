@@ -23,9 +23,7 @@ module.exports = toRegex;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "'use strict'
-
-    import extend from 'extend-shallow'
+    "import extend from 'extend-shallow'
     import safe from 'safe-regex'
 
     function toRegex(pattern, options) {

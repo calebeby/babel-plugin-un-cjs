@@ -59,8 +59,8 @@ test('babel', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {}
-    import _template from '@babel/template'
     import * as _package from '../package.json'
+    import _template from '@babel/template'
     export { Plugin }
     _default.Plugin = Plugin
     export const version = _package.version
@@ -118,14 +118,6 @@ test('babel', async () => {
       }
 
       return newObj
-    }
-
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule
-        ? obj
-        : {
-            default: obj,
-          }
     }
 
     const DEFAULT_EXTENSIONS = Object.freeze(['.js', '.jsx', '.es6', '.es', '.mjs'])

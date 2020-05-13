@@ -23,9 +23,7 @@ module.exports.default = exports.default
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "'use strict'
-
-    let _default2 = {}
+    "let _default2 = {}
     _default2.default = void 0
     const defaults = {}
 

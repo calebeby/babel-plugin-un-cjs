@@ -115,23 +115,15 @@ test('babel-highlight', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {}
-    import _chalk from 'chalk'
-    import _esutils from 'esutils'
     import * as _jsTokens from 'js-tokens'
+    import _esutils from 'esutils'
+    import _chalk from 'chalk'
     export { shouldHighlight }
     _default.shouldHighlight = shouldHighlight
     export { getChalk }
     _default.getChalk = getChalk
     export { highlight as default }
     _default.default = highlight
-
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule
-        ? obj
-        : {
-            default: obj,
-          }
-    }
 
     function _interopRequireWildcard(obj) {
       if (obj && obj.__esModule) {

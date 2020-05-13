@@ -126,3 +126,6 @@ export const updateReferencesTo = (
       ?.reference(p)
   })
 }
+
+export const isDefaultImportHelper = (name: string) =>
+  name.match(/interopRequireDefault/) || name === '__importDefault'

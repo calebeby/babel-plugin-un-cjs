@@ -22,9 +22,7 @@ function Super(...args) {
 test('babel-types', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "'use strict'
-
-    let _default = {}
+    "let _default = {}
     import _builder from '../builder'
 
     const _super = (_default.Super = Super)
@@ -32,16 +30,8 @@ test('babel-types', async () => {
     export { _super as super }
     _default.super = _super
 
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule
-        ? obj
-        : {
-            default: obj,
-          }
-    }
-
     function Super(...args) {
-      return (0, _builder)('Super', ...args)
+      return _builder('Super', ...args)
     }
 
     export default _default

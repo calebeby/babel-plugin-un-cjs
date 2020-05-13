@@ -9,6 +9,7 @@ import {
   isTopLevel,
   isModuleExports,
   isStillInTree,
+  isDefaultImportHelper,
 } from './helpers'
 import { handlePotentialExport } from './exports/handlePotentialExport'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
@@ -81,10 +82,7 @@ const babelPluginUnCjs = declare((api) => {
         handlePotentialWildcardExport(path, visitor)
         return
       }
-      if (
-        node.callee.name.match(/interopRequireDefault/) ||
-        node.callee.name === '__importDefault'
-      ) {
+      if (isDefaultImportHelper(node.callee.name)) {
         handleDefaultImport(path)
       } else if (
         node.callee.name.match(/interopRequireWildcard/) ||
@@ -110,7 +108,16 @@ const babelPluginUnCjs = declare((api) => {
       }
     },
 
+    Directive(path) {
+      // Since we are converting to ESM, the "use strict" directive is not needed
+      if (path.node.value.value === 'use strict') path.remove()
+    },
+
     FunctionDeclaration(path) {
+      if (path.node.id && isDefaultImportHelper(path.node.id.name)) {
+        path.remove()
+        return
+      }
       // Handle transforming babel lazy import blocks like this:
       // function _parser() {
       //   const data = require("@babel/parser");
