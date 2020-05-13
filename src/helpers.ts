@@ -137,3 +137,6 @@ export const isImportHelper = (name: string) =>
   isDefaultImportHelper(name) ||
   isNamespaceImportHelper(name) ||
   name.match(/getRequireWildcardCache/)
+
+export const importPathNameToIdentifierName = (importString: string) =>
+  importString.replace(/[^a-zA-Z]/g, '')

@@ -147,3 +147,25 @@ import bar_1 from 'bar'
 console.log(bar_1)
 bar_1()
 ```
+
+# Transforms default import from typescript sub scope
+
+```js
+const asdf = 'hi'
+
+if (asdf) {
+  const asdf = __importDefault(require('hi'))
+  console.log(asdf.default)
+}
+```
+
+to
+
+```js
+import _asdf from 'hi'
+const asdf = 'hi'
+
+if (asdf) {
+  console.log(_asdf)
+}
+```

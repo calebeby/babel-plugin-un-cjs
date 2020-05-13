@@ -5,6 +5,7 @@ import {
   injectImportIntoBody,
   updateReferencesTo,
   getProgramPath,
+  importPathNameToIdentifierName,
 } from '../helpers'
 
 export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
@@ -17,8 +18,19 @@ export const handleWildcardImport = (path: NodePath<t.CallExpression>) => {
   if (
     !variableDeclarator.isVariableDeclarator() ||
     !t.isIdentifier(variableDeclarator.node.id)
-  )
+  ) {
+    const newId = generateIdentifier(
+      path.scope,
+      importPathNameToIdentifierName(importPath.value),
+    )
+    const newImport = t.importDeclaration(
+      [t.importNamespaceSpecifier(newId)],
+      importPath,
+    )
+    injectImportIntoBody(getProgramPath(path), newImport)
+    path.replaceWith(newId)
     return
+  }
   const originalId = variableDeclarator.node.id
   const originalBinding = variableDeclarator.scope.getBinding(originalId.name)
   if (!originalBinding) return

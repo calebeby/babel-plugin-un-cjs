@@ -129,3 +129,40 @@ to
 import * as React from 'react'
 console.log(React.h, React.default)
 ```
+
+# Transforms namespace import from typescript sub scope (generated from dynamic import)
+
+```js
+const hi = 'hi'
+Promise.resolve().then(() => __importStar(require('hi')))
+```
+
+to
+
+```js
+import * as _hi from 'hi'
+const hi = 'hi'
+Promise.resolve().then(() => _hi)
+```
+
+# Transforms namespace import from typescript sub scope and deconflicts variable
+
+```js
+const foo = 'dont override me'
+
+const main = () => {
+  const foo = __importStar(require('hi'))
+  foo.bar()
+}
+```
+
+to
+
+```js
+import * as _foo from 'hi'
+const foo = 'dont override me'
+
+const main = () => {
+  _foo.bar()
+}
+```

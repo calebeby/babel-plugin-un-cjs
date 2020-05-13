@@ -5,6 +5,7 @@ import {
   getProgramPath,
   injectImportIntoBody,
   updateReferencesTo,
+  importPathNameToIdentifierName,
 } from '../helpers'
 
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
@@ -202,7 +203,7 @@ const hoistInlineRequireDefault = (
 
   const id = generateIdentifier(
     path.scope,
-    importString.value.replace(/[^a-zA-Z]/g, ''),
+    importPathNameToIdentifierName(importString.value),
   )
   const newImport = t.importDeclaration(
     [t.importDefaultSpecifier(id)],
