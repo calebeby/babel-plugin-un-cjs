@@ -88,13 +88,24 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     }>()
 
     for (const prop of originalId.properties) {
-      if (!t.isObjectProperty(prop)) return
+      if (!t.isObjectProperty(prop)) {
+        // Bail on transforming the destructure
+        // const { a, b, ...c } = require('hi')
+        hoistInlineRequireDefault(path, importString)
+        return
+      }
       // ignore rest element, can't do that
       // TODO: Potentially in the future we can handle rest/spread with namespace import
       const originalLocalId = prop.value
       const importedId = prop.key
-      if (!t.isIdentifier(originalLocalId) || !t.isIdentifier(importedId))
+      if (!t.isIdentifier(originalLocalId) || !t.isIdentifier(importedId)) {
+        // Bail on transforming the destructure
+        // Two examples of how this would happen:
+        // const { 'foo-bar': a } = require('hi')
+        // const { [foo]: a } = require('hi')
+        hoistInlineRequireDefault(path, importString)
         return
+      }
       const originalBinding = variableDeclarator.scope.getBinding(
         originalLocalId.name,
       )
