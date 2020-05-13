@@ -158,18 +158,3 @@ if (foo) {
   const { asdf } = _foo
 }
 ```
-
-# (skip) Require with destructuring and rest/spread
-
-(not implemented, low priority)
-
-```js
-const { foo, ...rest } = require('module')
-```
-
-to
-
-```js
-import * as module from 'module'
-const { foo, ...rest } = module
-```

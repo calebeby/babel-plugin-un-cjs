@@ -158,3 +158,42 @@ import hello from 'foo'
 
 const s = () => {}
 ```
+
+# (skip) Require with destructuring and rest/spread
+
+```js
+const { foo, ...rest } = require('module')
+```
+
+to
+
+```js
+import * as module from 'module'
+const { foo, ...rest } = module
+```
+
+# (skip) Require with dynamic property
+
+```js
+const { foo, ...rest } = require('module')
+```
+
+to
+
+```js
+import * as module from 'module'
+const { foo, ...rest } = module
+```
+
+# (skip) Require with destructuring
+
+```js
+const { foo, ...rest } = require('module')
+```
+
+to
+
+```js
+import * as module from 'module'
+const { foo, ...rest } = module
+```
