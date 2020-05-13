@@ -68,7 +68,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
         importString,
       )
       variableDeclarator.remove()
-      const importPath = injectImportIntoBody(program, newImport)
+      injectImportIntoBody(program, newImport)
       updateReferencesTo(references, localId)
       return
     }
@@ -86,11 +86,6 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     // console.log(require('foo'))
     // Becomes
     // import foo from 'foo'; console.log(foo)
-    //
-    // Also handling cases where require statement is within variable, but variable is not top-level
-    // () => { const foo = require('bar') }
-    // Becomes
-    // import bar from 'bar'; () => { const foo = bar }
 
     const id = generateIdentifier(
       program.scope,
@@ -100,7 +95,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       [t.importDefaultSpecifier(id)],
       importString,
     )
-    injectImport(path, newImport)
+    injectImportIntoBody(program, newImport)
     path.replaceWith(id)
     return
   }
@@ -121,7 +116,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     for (const prop of originalId.properties) {
       if (!t.isObjectProperty(prop)) return
       // ignore rest element, can't do that
-      // Potentially in the future we can handle rest/spread with namespace import
+      // TODO: Potentially in the future we can handle rest/spread with namespace import
       const originalLocalId = prop.value
       const importedId = prop.key
       if (!t.isIdentifier(originalLocalId) || !t.isIdentifier(importedId))
@@ -180,6 +175,6 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       : [t.importNamespaceSpecifier(localId)],
     importString,
   )
-  const importPath = injectImportIntoBody(program, newImport)
+  injectImportIntoBody(program, newImport)
   updateReferencesTo(references, localId)
 }

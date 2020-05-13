@@ -142,3 +142,19 @@ to
 ```js
 import hello from 'foo'
 ```
+
+And it doesn't conflict the name:
+
+```js
+const s = () => {
+  const hello = require('foo')
+}
+```
+
+to
+
+```js
+import hello from 'foo'
+
+const s = () => {}
+```

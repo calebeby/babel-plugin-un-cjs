@@ -28,9 +28,9 @@ test('snapdragon-utils', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {}
-    import sourcemapresolve from 'source-map-resolve'
-    import sourcemap from 'source-map'
     import extendshallow from 'extend-shallow'
+    import sourcemap from 'source-map'
+    import sourcemapresolve from 'source-map-resolve'
     export { extendshallow as extend }
     _default.extend = extendshallow
     export { sourcemap as SourceMap }
