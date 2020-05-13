@@ -5,6 +5,7 @@ import {
   getProgramPath,
   injectImportIntoBody,
   updateReferencesTo,
+  replaceBabelSequenceExpressionParent,
 } from '../helpers'
 
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
@@ -94,8 +95,6 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
         hoistInlineRequireDefault(path, importString)
         return
       }
-      // ignore rest element, can't do that
-      // TODO: Potentially in the future we can handle rest/spread with namespace import
       const originalLocalId = prop.value
       const importedId = prop.key
       if (!t.isIdentifier(originalLocalId) || !t.isIdentifier(importedId)) {
@@ -132,13 +131,15 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   }
 
   // const foo = require('bar')
-  // Two possible situations here:
+  // Three possible situations here:
   // 1. Never using foo directly, only properties like foo.bar and foo.baz:
   //    -> import * as foo from 'bar'
   // 2. Uses foo directly, and may additionally use properties (or foo is not used at all, directly or on a sub-property)
   //    -> import foo from 'bar'
   //    To ponder: Should a second import (namespace import) be created for the properties?
   //    How do we know if something is meant to be a property of the default export vs a separate export?
+  // 3. Every place where foo is used is foo.default. This is the output of babel transform commonjs with noInterop: true
+  //    -> import foo from 'bar
 
   const originalBinding = path.scope.getBinding(originalId.name)
   if (!originalBinding) return
@@ -147,12 +148,21 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   const localId = generateIdentifier(path.scope, originalId)
   path.parentPath.remove()
 
+  const usesDefaultOnly = references.every((ref) => {
+    const memberExp = ref.parent
+    return (
+      t.isMemberExpression(memberExp) &&
+      t.isIdentifier(memberExp.property) &&
+      memberExp.property.name === 'default'
+    )
+  })
+
   const useDefault =
-    references.length === 0 ||
+    usesDefaultOnly ||
     references.some(
-      (referencePath) =>
+      (ref) =>
         // at least one of the references is foo directly instead of a property
-        !t.isMemberExpression(referencePath.parent),
+        !t.isMemberExpression(ref.parent),
     )
 
   const newImport = t.importDeclaration(
@@ -162,7 +172,14 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     importString,
   )
   injectImportIntoBody(program, newImport)
-  updateReferencesTo(references, localId)
+  if (usesDefaultOnly) {
+    references.forEach((ref) => {
+      const memberExp = ref.parentPath
+      replaceBabelSequenceExpressionParent(memberExp, localId)
+    })
+  } else {
+    updateReferencesTo(references, localId)
+  }
 }
 
 /**

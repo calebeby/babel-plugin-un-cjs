@@ -22,14 +22,13 @@ console.log(_bar)
 _bar()
 ```
 
-# (skip) Transforms default import from babel with noInterop: true
+# Transforms default import from babel with noInterop: true
 
 ```js
 'use strict'
 
 var _bar = require('bar')
 
-// import foo, { asdf } from 'bar'
 console.log(_bar.default)
 ;(0, _bar.default)()
 ```

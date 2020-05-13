@@ -4,6 +4,7 @@ import {
   generateIdentifier,
   injectImportIntoBody,
   getProgramPath,
+  replaceBabelSequenceExpressionParent,
 } from '../helpers'
 
 export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
@@ -43,19 +44,7 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
           'Cannot read property from default export object',
         )
       }
-      if (memberExpression.parentPath.isSequenceExpression()) {
-        const sequenceExpression = memberExpression.parentPath
-        const isLength2 = sequenceExpression.node.expressions.length === 2
-        const firstElement = sequenceExpression.node.expressions[0]
-        // Babel commonjs will transpile foo() to ;(0, _foo.default)()
-        // We will undo the sequence expression
-        // First we check that it is indeed a safe-to-remove sequence expression
-        if (isLength2 && t.isLiteral(firstElement)) {
-          sequenceExpression.replaceWith(newImportId)
-          return
-        }
-      }
-      memberExpression.replaceWith(newImportId)
+      replaceBabelSequenceExpressionParent(memberExpression, newImportId)
     } else {
       ref.replaceWith(
         t.objectExpression([

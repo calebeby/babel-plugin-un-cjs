@@ -129,3 +129,23 @@ export const updateReferencesTo = (
 
 export const isDefaultImportHelper = (name: string) =>
   name.match(/interopRequireDefault/) || name === '__importDefault'
+
+/*
+ * Babel commonjs will transpile foo() to ;(0, _foo)()
+ * Replaces (0, ...) with replacementNode
+ */
+export const replaceBabelSequenceExpressionParent = (
+  path: NodePath<t.Node>,
+  replacementNode: t.Identifier,
+) => {
+  if (path.parentPath.isSequenceExpression()) {
+    const sequenceExpression = path.parentPath
+    const isLength2 = sequenceExpression.node.expressions.length === 2
+    const firstElement = sequenceExpression.node.expressions[0]
+    if (isLength2 && t.isLiteral(firstElement)) {
+      sequenceExpression.replaceWith(replacementNode)
+      return
+    }
+  }
+  path.replaceWith(replacementNode)
+}
