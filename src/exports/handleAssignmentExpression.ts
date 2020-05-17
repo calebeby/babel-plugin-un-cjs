@@ -1,12 +1,7 @@
 import { NodePath, types as t } from '@babel/core'
 import { ModulePathsToReplace, NamedExportsMap } from '..'
 import { Binding } from '@babel/traverse'
-import {
-  assignMaps,
-  isModuleExports,
-  isValidIdentiferName,
-  toString,
-} from '../helpers'
+import { assignMaps, isModuleExports, isValidIdentiferName } from '../helpers'
 
 /**
  * Collects all property assignments to create a map of named exports

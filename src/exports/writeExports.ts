@@ -1,11 +1,6 @@
 import { NodePath, types as t } from '@babel/core'
 import { ModulePathsToReplace, NamedExportsMap, ExportPath } from '..'
-import {
-  findParentProgramChild,
-  generateIdentifier,
-  toString,
-  isStillInTree,
-} from '../helpers'
+import { findParentProgramChild, generateIdentifier } from '../helpers'
 
 /** Retrieves export name and value from an ExportPath */
 const getExportedValue = (path: ExportPath): NodePath<t.Expression> | false => {
