@@ -122,7 +122,7 @@ test('babel-highlight', async () => {
     _default.shouldHighlight = shouldHighlight
     export { getChalk }
     _default.getChalk = getChalk
-    export { highlight as default }
+    export default highlight
     _default.default = highlight
 
     function getDefs(chalk) {

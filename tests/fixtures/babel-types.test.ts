@@ -24,11 +24,9 @@ test('babel-types', async () => {
   expect(transformed).toMatchInlineSnapshot(`
     "let _default = {}
     import _builder from '../builder'
-
-    const _super = (_default.Super = Super)
-
-    export { _super as super }
-    _default.super = _super
+    export { Super as super }
+    export { Super }
+    _default.super = _default.Super = Super
 
     function Super(...args) {
       return _builder('Super', ...args)

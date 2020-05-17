@@ -37,6 +37,7 @@
     "@types/node": "13.13.5",
     "jest": "26.0.1",
     "jest-circus": "26.0.1",
+    "jest-watch-typeahead": "0.6.0",
     "prettier": "2.0.5",
     "rollup": "2.9.1",
     "rollup-plugin-dts": "1.4.2",

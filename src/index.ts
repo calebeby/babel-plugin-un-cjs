@@ -6,14 +6,13 @@ import { handleRequire } from './imports/handleRequire'
 import { handleWildcardImport } from './imports/handleWildcardImport'
 import {
   pathsToRemove,
-  isTopLevel,
   isModuleExports,
   isStillInTree,
   isDefaultImportHelper,
   isNamespaceImportHelper,
   isImportHelper,
 } from './helpers'
-import { handlePotentialExport } from './exports/handlePotentialExport'
+import { handleAssignmentExpression } from './exports/handleAssignmentExpression'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 import { handlePotentialLazyImportFunction } from './imports/handlePotentialLazyImportFunction'
 import { handlePotentialWildcardExport } from './exports/handlePotentialWildcardExport'
@@ -149,35 +148,7 @@ const babelPluginUnCjs = declare((api) => {
     },
 
     AssignmentExpression(path) {
-      const { node } = path
-
-      if (bail) return
-
-      // We must bail if there is a non-static export
-
-      if (!isTopLevel(path)) {
-        // assignment that is not in the top-level program
-        // we want to see if module.exports or exports is modified
-        // if it is, we bail on all exports modifications in this file
-
-        if (t.isIdentifier(node.left)) {
-          if (node.left.name === 'exports') bail = true
-        } else {
-          // there are cases where this will think that module is getting modified but it actually isn't
-          // for example (module ? obj1 : obj2).exports = 'false' will never modify module.exports
-          // but that is too complicated to handle for now.
-          path.get('left').traverse({
-            Identifier(path) {
-              if (path.node.name === 'module') bail = true
-            },
-          })
-        }
-        // regardless of whether we are bailing on exports modifications in the entire file,
-        // we do not need to continue for this assignment because it is not in the top level
-        return
-      }
-
-      handlePotentialExport(path, modulePathsToReplace, namedExports)
+      handleAssignmentExpression(path, modulePathsToReplace, namedExports)
     },
   }
 

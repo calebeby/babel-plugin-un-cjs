@@ -51,7 +51,6 @@ exports.default = _default;
     "let _default2 = {}
     import * as _jestMatcherUtils from 'jest-matcher-utils'
     import * as _jestMatchersObject from './jestMatchersObject'
-    _default2.default = void 0
 
     const resetAssertionsLocalState = () => {
       _jestMatchersObject.setState()
@@ -86,7 +85,7 @@ exports.default = _default;
     }
 
     var _default = extractExpectedAssertionsErrors
-    export { _default as default }
+    export default _default
     _default2.default = _default
     "
   `)

@@ -1,5 +1,6 @@
 import { NodePath, types as t } from '@babel/core'
 import { Scope } from '@babel/traverse'
+import generate from '@babel/generator'
 
 // we are storing them here instead of removing them right away in case we bail
 // on export modification
@@ -74,19 +75,6 @@ export const isModuleExports = (node: t.MemberExpression): boolean =>
   t.isIdentifier(node.property) &&
   node.property.name === 'exports'
 
-export const isTopLevel = (path: NodePath) =>
-  t.isProgram(path.parentPath.parent) ||
-  everyParent(
-    path,
-    (p) =>
-      // workaround to allow for: const foo = module.exports = 'asdf'
-      (p.isProgram() ||
-        p.isAssignmentExpression() ||
-        p.isVariableDeclaration() ||
-        p.isVariableDeclarator()) &&
-      p.parentKey !== 'right',
-  )
-
 /**
  * Returns whether this node and all of its parents are not removed
  * This is needed because path.removed does not reflect ancestor removal
@@ -140,3 +128,17 @@ export const isImportHelper = (name: string) =>
 
 export const importPathNameToIdentifierName = (importString: string) =>
   importString.replace(/[^a-zA-Z]/g, '')
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types#Variables
+ */
+export const isValidIdentiferName = (name: string) => {
+  if (!name[0].match(/[a-zA-Z_$]/)) return false
+  if (!name.match(/^[a-zA-Z0-9_$]+$/)) return false
+  return true
+}
+
+export const toString = (input: NodePath | t.Node) => {
+  const node = (input as NodePath).node || input
+  return generate(node).code
+}
