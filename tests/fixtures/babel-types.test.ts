@@ -22,17 +22,17 @@ function Super(...args) {
 test('babel-types', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
+    "let _exports = {}
     import _builder from '../builder'
     export { Super as super }
     export { Super }
-    _default.super = _default.Super = Super
+    _exports.super = _exports.Super = Super
 
     function Super(...args) {
       return _builder('Super', ...args)
     }
 
-    export default _default
+    export default _exports
     "
   `)
 })

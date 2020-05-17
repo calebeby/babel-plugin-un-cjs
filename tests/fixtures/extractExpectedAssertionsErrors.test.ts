@@ -48,7 +48,7 @@ exports.default = _default;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default2 = {}
+    "let _exports = {}
     import * as _jestMatcherUtils from 'jest-matcher-utils'
     import * as _jestMatchersObject from './jestMatchersObject'
 
@@ -86,7 +86,7 @@ exports.default = _default;
 
     var _default = extractExpectedAssertionsErrors
     export default _default
-    _default2.default = _default
+    _exports.default = _default
     "
   `)
 })

@@ -55,7 +55,7 @@ export const writeExports = (
   namedExports: NamedExportsMap,
 ) => {
   const modulePathsArray = [...modulePathsToReplace]
-  const exportObjectId = programPath.scope.generateUidIdentifier('_default')
+  const exportObjectId = programPath.scope.generateUidIdentifier('_exports')
 
   // PLEASE NOTE, DO NOT FORGET:
   // exports = ... DOES NOTHING

@@ -36,8 +36,8 @@ module.exports = toRegex;
       return 'blah'
     }
     toRegex.create = create
-    let _default = toRegex
-    export default _default
+    let _exports = toRegex
+    export default _exports
     "
   `)
 })

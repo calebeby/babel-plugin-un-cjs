@@ -114,16 +114,16 @@ function highlight(code, options = {}) {
 test('babel-highlight', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
+    "let _exports = {}
     import * as _jsTokens from 'js-tokens'
     import _esutils from 'esutils'
     import _chalk from 'chalk'
     export { shouldHighlight }
-    _default.shouldHighlight = shouldHighlight
+    _exports.shouldHighlight = shouldHighlight
     export { getChalk }
-    _default.getChalk = getChalk
+    _exports.getChalk = getChalk
     export default highlight
-    _default.default = highlight
+    _exports.default = highlight
 
     function getDefs(chalk) {
       return {

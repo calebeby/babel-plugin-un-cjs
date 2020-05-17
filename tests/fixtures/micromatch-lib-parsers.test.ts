@@ -27,7 +27,7 @@ exports.asdf = nanomatch
     import * as regexNot from 'regex-not'
     import toRegex from 'to-regex'
 
-    let _default = function (snapdragon) {
+    let _exports = function (snapdragon) {
       console.log('nanomatch', nanomatch.parsers)
       console.log('extglob', extglob.parsers)
     }
@@ -36,10 +36,10 @@ exports.asdf = nanomatch
       regexNot.create()
       return toRegex()
     }
-    _default.sdf = sdf
+    _exports.sdf = sdf
     export { nanomatch as asdf }
-    _default.asdf = nanomatch
-    export default _default
+    _exports.asdf = nanomatch
+    export default _exports
     "
   `)
 })

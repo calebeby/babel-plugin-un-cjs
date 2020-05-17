@@ -8,10 +8,10 @@ module.exports.asdf = () => {}
 to
 
 ```js
-let _default = {}
+let _exports = {}
 export const asdf = () => {}
-_default.asdf = asdf
-export default _default
+_exports.asdf = asdf
+export default _exports
 ```
 
 Also works for nested assignments:
@@ -25,12 +25,12 @@ module.exports.foo = 'foo'
 to
 
 ```js
-let _default = {}
+let _exports = {}
 export const asdf = () => {}
-_default.asdf = asdf
+_exports.asdf = asdf
 export const foo = 'foo'
-_default.foo = foo
-export default _default
+_exports.foo = foo
+export default _exports
 ```
 
 # Removes unused assignments to undefined
@@ -43,10 +43,10 @@ module.exports.asdf = () => {}
 to
 
 ```js
-let _default = {}
+let _exports = {}
 export const asdf = () => {}
-_default.asdf = asdf
-export default _default
+_exports.asdf = asdf
+export default _exports
 ```
 
 # Does not remove assignments to something else, even if it has no side effects
@@ -61,9 +61,9 @@ module.exports.asdf = () => {}
 to
 
 ```js
-let _default = {}
-_default.asdf = 'asdf'
+let _exports = {}
+_exports.asdf = 'asdf'
 export const asdf = () => {}
-_default.asdf = asdf
-export default _default
+_exports.asdf = asdf
+export default _exports
 ```

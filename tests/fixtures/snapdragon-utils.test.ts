@@ -27,34 +27,34 @@ exports.last = function(arr, n) {
 test('snapdragon-utils', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
+    "let _exports = {}
     import extendshallow from 'extend-shallow'
     import sourcemap from 'source-map'
     import sourcemapresolve from 'source-map-resolve'
     export { extendshallow as extend }
-    _default.extend = extendshallow
+    _exports.extend = extendshallow
     export { sourcemap as SourceMap }
-    _default.SourceMap = sourcemap
+    _exports.SourceMap = sourcemap
     export { sourcemapresolve as sourceMapResolve }
-    _default.sourceMapResolve = sourcemapresolve
+    _exports.sourceMapResolve = sourcemapresolve
     export const unixify = function (fp) {
       return 'unixify'
     }
-    _default.unixify = unixify
+    _exports.unixify = unixify
     export const isString = function (str) {
       return str && typeof str === 'string'
     }
-    _default.isString = isString
+    _exports.isString = isString
     export const arrayify = function (val) {
       if (typeof val === 'string') return [val]
       return val ? (Array.isArray(val) ? val : [val]) : []
     }
-    _default.arrayify = arrayify
+    _exports.arrayify = arrayify
     export const last = function (arr, n) {
       return arr[arr.length - (n || 1)]
     }
-    _default.last = last
-    export default _default
+    _exports.last = last
+    export default _exports
     "
   `)
 })

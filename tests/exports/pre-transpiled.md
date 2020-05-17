@@ -24,18 +24,18 @@ exports.default = _default
 to
 
 ```js
-let _default2 = {}
+let _exports = {}
 
 const foo = () => {}
 
 export { foo }
-_default2.foo = foo
+_exports.foo = foo
 
 const asdf = () => {}
 
 var _default = asdf
 export default _default
-_default2.default = _default
+_exports.default = _default
 ```
 
 # Transforms TS output with named and default exports
@@ -59,14 +59,14 @@ exports.default = asdf
 to
 
 ```js
-let _default = {}
+let _exports = {}
 export const foo = () => {}
-_default.foo = foo
+_exports.foo = foo
 
 const asdf = () => {}
 
 export default asdf
-_default.default = asdf
+_exports.default = asdf
 ```
 
 # Transforms babel output with multiple aliased exports
@@ -82,19 +82,19 @@ exports.asdf = exports.foo = foo
 to
 
 ```js
-let _default = {}
+let _exports = {}
 
 const foo = () => {}
 
 export { foo as asdf }
 export { foo }
-_default.asdf = _default.foo = foo
-export default _default
+_exports.asdf = _exports.foo = foo
+export default _exports
 ```
 
 # Transforms TS output with multiple aliased exports
 
-Ideally, the `asdf` export wouldn't reference \_default after transformation
+Ideally, the `asdf` export wouldn't reference \_exports after transformation
 
 Pre-TS input:
 
@@ -113,10 +113,10 @@ exports.asdf = exports.foo
 to
 
 ```js
-let _default = {}
+let _exports = {}
 export const foo = () => {}
-_default.foo = foo
-export const asdf = _default.foo
-_default.asdf = asdf
-export default _default
+_exports.foo = foo
+export const asdf = _exports.foo
+_exports.asdf = asdf
+export default _exports
 ```

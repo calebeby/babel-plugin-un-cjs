@@ -58,18 +58,18 @@ function Plugin(alias) {
 test('babel', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {}
+    "let _exports = {}
     import * as _package from '../package.json'
     import _template from '@babel/template'
     export { Plugin }
-    _default.Plugin = Plugin
+    _exports.Plugin = Plugin
     export const version = _package.version
-    _default.version = _package.version
+    _exports.version = _package.version
     export { _template as template }
-    _default.template = _template
+    _exports.template = _template
     const DEFAULT_EXTENSIONS = Object.freeze(['.js', '.jsx', '.es6', '.es', '.mjs'])
     export { DEFAULT_EXTENSIONS }
-    _default.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS
+    _exports.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS
 
     class OptionManager {
       init(opts) {
@@ -78,7 +78,7 @@ test('babel', async () => {
     }
 
     export { OptionManager }
-    _default.OptionManager = OptionManager
+    _exports.OptionManager = OptionManager
 
     function Plugin(alias) {
       throw new Error(
@@ -86,7 +86,7 @@ test('babel', async () => {
       )
     }
 
-    export default _default
+    export default _exports
     "
   `)
 })

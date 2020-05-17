@@ -23,7 +23,7 @@ module.exports.default = exports.default
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default2 = {}
+    "let _exports = {}
     const defaults = {}
 
     var waitForExpect = function waitForExpect(expectation) {}
@@ -33,7 +33,7 @@ module.exports.default = exports.default
     })
 
     export default _default
-    _default2.default = _default
+    _exports.default = _default
     "
   `)
 })

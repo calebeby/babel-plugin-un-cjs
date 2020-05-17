@@ -18,10 +18,10 @@ to
 ```js
 export const aliceblue = [240, 248, 255]
 export const antiquewhite = [250, 235, 215]
-let _default = {
+let _exports = {
   aliceblue: aliceblue,
   antiquewhite: antiquewhite,
   'aq-ua': [0, 255, 255],
 }
-export default _default
+export default _exports
 ```

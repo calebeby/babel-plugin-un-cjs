@@ -8,10 +8,10 @@ console.log(module.exports)
 to
 
 ```js
-let _default = function () {}
+let _exports = function () {}
 
-console.log(_default)
-export default _default
+console.log(_exports)
+export default _exports
 ```
 
 # Assign module.exports = arrow function
@@ -23,9 +23,9 @@ module.exports = () => {}
 to
 
 ```js
-let _default = () => {}
+let _exports = () => {}
 
-export default _default
+export default _exports
 ```
 
 # Assign module.exports = class
@@ -37,7 +37,7 @@ module.exports = class {}
 to
 
 ```js
-let _default = class {}
+let _exports = class {}
 
-export default _default
+export default _exports
 ```

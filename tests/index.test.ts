@@ -13,11 +13,11 @@ Object.defineProperty(exports, "version", {
   `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "let _default = {}
+      "let _exports = {}
       import * as _package from '../package.json'
       export const version = _package.version
-      _default.version = _package.version
-      export default _default
+      _exports.version = _package.version
+      export default _exports
       "
     `)
   })
@@ -34,17 +34,17 @@ module.exports.foobarbaz = 'foobarbaz'
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
         "const foo = 'foo'
-        _default.foobar = 'foobar'
+        _exports.foobar = 'foobar'
 
         const _foo = () => {}
 
         export { _foo as foo }
-        let _default = {
+        let _exports = {
           foo: _foo,
         }
         export const foobarbaz = 'foobarbaz'
-        _default.foobarbaz = foobarbaz
-        export default _default
+        _exports.foobarbaz = foobarbaz
+        export default _exports
         "
       `)
     })
@@ -63,12 +63,12 @@ module.exports.otherExport = 'otherExport'
         const obj = {
           foo: foo,
         }
-        let _default = obj
+        let _exports = obj
         export const foobarbaz = 'foobarbaz'
         obj.foobarbaz = foobarbaz
         export const otherExport = 'otherExport'
-        _default.otherExport = otherExport
-        export default _default
+        _exports.otherExport = otherExport
+        export default _exports
         "
       `)
     })
@@ -104,8 +104,8 @@ module.exports = main
 
         export const other = 'hiiiii'
         main.other = other
-        let _default = main
-        export default _default
+        let _exports = main
+        export default _exports
         "
       `)
     })
@@ -201,12 +201,12 @@ module.exports = {
 `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "_default.bar = 'hi'
+      "_exports.bar = 'hi'
       export const foo = () => {}
-      let _default = {
+      let _exports = {
         foo: foo,
       }
-      export default _default
+      export default _exports
       "
     `)
   })
@@ -223,13 +223,13 @@ exports = {
     // And in the above module.exports code foo is exported but not here
     // It is because assigning to the `exports` object does not clear out the `module.exports` object
     expect(transformed).toMatchInlineSnapshot(`
-      "let _default = {}
+      "let _exports = {}
       export const bar = 'hi'
-      _default.bar = bar
-      _default = {
+      _exports.bar = bar
+      _exports = {
         foo: () => {},
       }
-      export default _default
+      export default _exports
       "
     `)
   })
