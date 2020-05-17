@@ -71,6 +71,13 @@ _exports.default = asdf
 
 # Transforms babel output with multiple aliased exports
 
+Pre-babel input:
+
+```js
+export const foo = () => {}
+export { foo as asdf }
+```
+
 ```js
 exports.asdf = exports.foo = void 0
 
@@ -119,4 +126,102 @@ _exports.foo = foo
 export const asdf = _exports.foo
 _exports.asdf = asdf
 export default _exports
+```
+
+# Transforms babel's export \* from ""
+
+Pre-babel input:
+
+```js
+export * from 'foo'
+```
+
+```js
+'use strict'
+
+var _foo = require('foo')
+
+Object.keys(_foo).forEach(function (key) {
+  if (key === 'default' || key === '__esModule') return
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _foo[key]
+    },
+  })
+})
+```
+
+to
+
+```js
+export * from 'foo'
+```
+
+# Transforms babel's export \* from "" with loose: true
+
+Pre-babel input:
+
+```js
+export * from 'foo'
+```
+
+```js
+'use strict'
+
+var _foo = require('foo')
+
+Object.keys(_foo).forEach(function (key) {
+  if (key === 'default' || key === '__esModule') return
+  exports[key] = _foo[key]
+})
+```
+
+to
+
+```js
+export * from 'foo'
+```
+
+# Transforms Typescript's export \* from ""
+
+Pre-TS input:
+
+```js
+export * from 'foo'
+```
+
+```js
+'use strict'
+var __createBinding =
+  (this && this.__createBinding) ||
+  (Object.create
+    ? function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k
+        Object.defineProperty(o, k2, {
+          enumerable: true,
+          get: function () {
+            return m[k]
+          },
+        })
+      }
+    : function (o, m, k, k2) {
+        if (k2 === undefined) k2 = k
+        o[k2] = m[k]
+      })
+var __exportStar =
+  (this && this.__exportStar) ||
+  function (m, exports) {
+    for (var p in m)
+      if (p !== 'default' && !exports.hasOwnProperty(p))
+        __createBinding(exports, m, p)
+  }
+Object.defineProperty(exports, '__esModule', { value: true })
+__exportStar(require('foo'), exports)
+```
+
+to
+
+```js
+export * from 'foo'
 ```

@@ -94,7 +94,8 @@ const getExportInfo = (path: NodePath): false | ExportInfo => {
       return {
         ...objExportInfo,
         // if it is an identifier, use it, otherwise, it is unknown
-        assignmentTarget: prop.isIdentifier() ? prop : 'unknown',
+        assignmentTarget:
+          prop.isIdentifier() && !path.node.computed ? prop : 'unknown',
       }
     }
     if (objExportInfo.assignmentTarget === 'unknown') return objExportInfo

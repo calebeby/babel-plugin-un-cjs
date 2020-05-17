@@ -6,6 +6,10 @@ import generate from '@babel/generator'
 // on export modification
 export const pathsToRemove = new Set<NodePath>()
 
+/**
+ * Given a node, checks to see if it matches require("...")
+ * If it does, returns the require path within that expression
+ */
 export const getRequirePath = (requireStatement: t.Node) => {
   if (
     !t.isCallExpression(requireStatement) ||
@@ -69,11 +73,17 @@ export const everyParent = (
   return false
 }
 
-export const isModuleExports = (node: t.MemberExpression): boolean =>
+/** Returns whether a node is `module.exports` */
+export const isModuleExports = (node: t.Node): boolean =>
+  t.isMemberExpression(node) &&
   t.isIdentifier(node.object) &&
   node.object.name === 'module' &&
   t.isIdentifier(node.property) &&
   node.property.name === 'exports'
+
+/** Returns whether a node is `exports` */
+export const isExports = (node: t.Node): boolean =>
+  t.isIdentifier(node) && node.name === 'exports'
 
 /**
  * Returns whether this node and all of its parents are not removed
@@ -121,10 +131,12 @@ export const isDefaultImportHelper = (name: string) =>
 export const isNamespaceImportHelper = (name: string) =>
   name.match(/interopRequireWildcard/) || name === '__importStar'
 
-export const isImportHelper = (name: string) =>
+export const isInteropHelper = (name: string) =>
   isDefaultImportHelper(name) ||
   isNamespaceImportHelper(name) ||
-  name.match(/getRequireWildcardCache/)
+  name.match(/getRequireWildcardCache/) ||
+  name === '__createBinding' ||
+  name === '__exportStar'
 
 export const importPathNameToIdentifierName = (importString: string) =>
   importString.replace(/[^a-zA-Z]/g, '')

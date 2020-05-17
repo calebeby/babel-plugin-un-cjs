@@ -10,12 +10,15 @@ import {
   isStillInTree,
   isDefaultImportHelper,
   isNamespaceImportHelper,
-  isImportHelper,
+  isInteropHelper,
 } from './helpers'
 import { handleAssignmentExpression } from './exports/handleAssignmentExpression'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 import { handlePotentialLazyImportFunction } from './imports/handlePotentialLazyImportFunction'
-import { handlePotentialWildcardExport } from './exports/handlePotentialWildcardExport'
+import {
+  handlePotentialBabelWildcardExport,
+  handleTSWildcardExport,
+} from './exports/handlePotentialWildcardExport'
 
 /**
  * NodePath of:
@@ -81,13 +84,15 @@ const babelPluginUnCjs = declare((api) => {
         //     }
         //   });
         // });
-        handlePotentialWildcardExport(path, visitor)
+        handlePotentialBabelWildcardExport(path, visitor)
         return
       }
       if (isDefaultImportHelper(node.callee.name)) {
         handleDefaultImport(path)
       } else if (isNamespaceImportHelper(node.callee.name)) {
         handleWildcardImport(path)
+      } else if (node.callee.name === '__exportStar') {
+        handleTSWildcardExport(path)
       } else if (node.callee.name === 'require') {
         handleRequire(path)
       }
@@ -124,13 +129,13 @@ const babelPluginUnCjs = declare((api) => {
     },
 
     VariableDeclarator(path) {
-      if (t.isIdentifier(path.node.id) && isImportHelper(path.node.id.name)) {
+      if (t.isIdentifier(path.node.id) && isInteropHelper(path.node.id.name)) {
         path.remove()
       }
     },
 
     FunctionDeclaration(path) {
-      if (path.node.id && isImportHelper(path.node.id.name)) {
+      if (path.node.id && isInteropHelper(path.node.id.name)) {
         path.remove()
         return
       }

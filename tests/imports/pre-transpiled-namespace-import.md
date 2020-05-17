@@ -103,6 +103,7 @@ console.log(React.h, React.default)
 ```js
 'use strict'
 Object.defineProperty(exports, '__esModule', { value: true })
+// TODO: add actual helpers here to make sure they get removed
 const React = __importStar(require('react'))
 console.log(React.h, React.default)
 ```
