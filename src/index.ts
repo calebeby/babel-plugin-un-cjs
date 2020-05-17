@@ -115,8 +115,6 @@ const babelPluginUnCjs = declare((api) => {
         } else {
           modulePathsToReplace.add(path)
         }
-      } else if (path.node.name === 'global') {
-        path.replaceWith(t.identifier('window'))
       }
     },
 
