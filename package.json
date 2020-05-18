@@ -22,7 +22,7 @@
     "test": "jest",
     "format": "prettier --write .",
     "test:watch": "jest --watch",
-    "prepublishOnly": "npm run type && npm run test && npm run format && npm run build"
+    "prepublishOnly": "npm ci && npm run type && npm run test && npm run format && npm run build"
   },
   "keywords": [],
   "author": "",
