@@ -49,11 +49,11 @@ const babelPluginUnCjs = declare((api) => {
   const modulePathsToReplace: ModulePathsToReplace = new Set()
 
   let bail = false
-  const visitor: Visitor<{}> = {
+  const visitor: Visitor = {
     Program: {
       exit(programPath) {
         if (!bail) {
-          Array.from(pathsToRemove.values()).forEach((p) => p.remove())
+          ;[...pathsToRemove.values()].forEach((p) => p.remove())
           if (namedExports.size !== 0)
             writeExports(programPath, modulePathsToReplace, namedExports)
         }
@@ -107,19 +107,17 @@ const babelPluginUnCjs = declare((api) => {
       const secondElement = path.node.expressions[1]
       if (isLength2 && t.isLiteral(firstElement)) {
         path.replaceWith(secondElement)
-        return
       }
     },
 
     Identifier(path) {
-      if (path.node.name === 'exports') {
-        const parent = path.parentPath
-        // If the parent is module.exports, use that instead of just exports
-        if (parent.isMemberExpression() && isModuleExports(parent.node)) {
-          modulePathsToReplace.add(parent)
-        } else {
-          modulePathsToReplace.add(path)
-        }
+      if (path.node.name !== 'exports') return
+      const parent = path.parentPath
+      // If the parent is module.exports, use that instead of just exports
+      if (parent.isMemberExpression() && isModuleExports(parent.node)) {
+        modulePathsToReplace.add(parent)
+      } else {
+        modulePathsToReplace.add(path)
       }
     },
 

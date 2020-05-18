@@ -12,6 +12,9 @@ export default [
       { file: 'dist/index.mjs', format: 'esm' },
     ],
     external: ['@babel/core', '@babel/helper-plugin-utils', '@babel/generator'],
+    treeshake: {
+      moduleSideEffects: false,
+    },
     plugins: [
       resolve({
         extensions: ['.js', '.ts'],

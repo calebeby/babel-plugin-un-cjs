@@ -125,6 +125,7 @@ export const writeExports = (
     const existingDefaultExportValue =
       existingDefaultExport && getExportedValue(existingDefaultExport)
     const hasDefaultExportIdentifierAlready =
+      // eslint-disable-next-line caleb/@typescript-eslint/prefer-optional-chain -- Optional chaining does not behave correctly because it does not filter out `false`
       existingDefaultExportValue && existingDefaultExportValue.isIdentifier()
     if (!hasDefaultExportIdentifierAlready)
       // Add export default _default at the bottom

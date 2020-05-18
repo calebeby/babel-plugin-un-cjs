@@ -15,7 +15,7 @@ import { getRequirePath, isModuleExports, isExports } from '../helpers'
 // });
 export const handlePotentialBabelWildcardExport = (
   path: NodePath<t.CallExpression>,
-  visitor: Visitor<{}>,
+  visitor: Visitor,
 ) => {
   // Check for Object.keys()
   const callee = path.node.callee

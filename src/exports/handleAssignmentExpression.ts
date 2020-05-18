@@ -212,8 +212,7 @@ export const handleAssignmentExpression = (
     // If the already-existing assignment is known to execute before this one
     // We will determine if it can be removed
     if (
-      existingExport &&
-      existingExport.isAssignmentExpression() &&
+      existingExport?.isAssignmentExpression() &&
       !path.willIMaybeExecuteBefore(existingExport) &&
       evaluatesToUndefined(existingExport.node.right)
     ) {
