@@ -21,7 +21,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
     if (expressionStatement.parentPath.isProgram()) {
       expressionStatement.replaceWith(newImport)
     } else {
-      injectImportIntoBody(program, newImport).type
+      injectImportIntoBody(program, newImport)
       expressionStatement.remove()
     }
 

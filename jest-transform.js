@@ -1,10 +1,6 @@
 // @ts-check
-const crypto = require('crypto')
-const fs = require('fs')
 const path = require('path')
 const { SourceMapGenerator } = require('source-map')
-
-const THIS_FILE = fs.readFileSync(__filename)
 
 /** @param {string[]} lines */
 const parseMarkdown = (lines) => {
@@ -18,9 +14,9 @@ const parseMarkdown = (lines) => {
   /** @type {{nodeType: string, lines: Line[]}[]} */
   const chunks = []
 
-  for (let i = 0; i < lines.length; i++) {
+  for (const [i, element] of lines.entries()) {
     /** @type {Line} */
-    const line = { line: i + 1, contents: lines[i] }
+    const line = { line: i + 1, contents: element }
 
     const lastChunk = chunks[chunks.length - 1]
 
@@ -109,10 +105,10 @@ const transformer = {
     const transformPath = JSON.stringify(require.resolve('./test-util.ts'))
     let code = `const transform = require(${transformPath}).default`
 
-    for (let test of tests) {
+    for (const test of tests) {
       const flag = test.flag ? `.${test.flag}` : ''
       code += `\ntest${flag}(${JSON.stringify(test.name)}, async () => {\n`
-      for (let assertion of test.assertions) {
+      for (const assertion of test.assertions) {
         const input = JSON.stringify(
           assertion.input.map((l) => l.contents).join('\n'),
         )

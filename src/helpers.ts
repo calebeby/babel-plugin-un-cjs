@@ -40,9 +40,7 @@ export const generateIdentifier = (
     typeof preferredId === 'string' ? preferredId : preferredId.name
   if (scope.hasBinding(name) || reserved.includes(name))
     return scope.generateUidIdentifier(name)
-  else {
-    return typeof preferredId === 'string' ? t.identifier(name) : preferredId
-  }
+  return typeof preferredId === 'string' ? t.identifier(name) : preferredId
 }
 
 /** Object.assign but for maps */
@@ -50,9 +48,9 @@ export const assignMaps = <Key, Val>(
   map: Map<Key, Val>,
   ...sources: Map<Key, Val>[]
 ) => {
-  for (let source of sources) {
+  for (const source of sources) {
     const entries = source.entries()
-    for (let entry of entries) map.set(...entry)
+    for (const entry of entries) map.set(...entry)
   }
 }
 
@@ -126,15 +124,15 @@ export const updateReferencesTo = (
 }
 
 export const isDefaultImportHelper = (name: string) =>
-  name.match(/interopRequireDefault/) || name === '__importDefault'
+  /interopRequireDefault/.exec(name) || name === '__importDefault'
 
 export const isNamespaceImportHelper = (name: string) =>
-  name.match(/interopRequireWildcard/) || name === '__importStar'
+  /interopRequireWildcard/.exec(name) || name === '__importStar'
 
 export const isInteropHelper = (name: string) =>
   isDefaultImportHelper(name) ||
   isNamespaceImportHelper(name) ||
-  name.match(/getRequireWildcardCache/) ||
+  /getRequireWildcardCache/.exec(name) ||
   name === '__createBinding' ||
   name === '__exportStar'
 
@@ -145,8 +143,8 @@ export const importPathNameToIdentifierName = (importString: string) =>
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types#Variables
  */
 export const isValidIdentiferName = (name: string) => {
-  if (!name[0].match(/[a-zA-Z_$]/)) return false
-  if (!name.match(/^[a-zA-Z0-9_$]+$/)) return false
+  if (!/[a-zA-Z_$]/.exec(name[0])) return false
+  if (!/^[\w$]+$/.exec(name)) return false
   return true
 }
 

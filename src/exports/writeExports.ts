@@ -124,8 +124,7 @@ export const writeExports = (
     const existingDefaultExport = namedExports.get('default')
     const existingDefaultExportValue =
       existingDefaultExport && getExportedValue(existingDefaultExport)
-    const hasDefaultExportIdentifierAlready =
-      existingDefaultExportValue && existingDefaultExportValue.isIdentifier()
+    const hasDefaultExportIdentifierAlready = existingDefaultExportValue?.isIdentifier()
     if (!hasDefaultExportIdentifierAlready)
       // Add export default _default at the bottom
       programBody[programBody.length - 1].insertAfter(
