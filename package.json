@@ -20,9 +20,21 @@
     "type": "tsc --noEmit",
     "type:watch": "tsc --noEmit --watch",
     "test": "jest",
-    "format": "prettier --write .",
+    "check-lint": "eslint . && prettier --check .",
+    "lint": "eslint --fix . && prettier --write .",
     "test:watch": "jest --watch",
     "prepublishOnly": "npm ci && npm run type && npm run test && npm run format && npm run build"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "extends": [
+      "plugin:caleb/recommended"
+    ],
+    "rules": {
+      "caleb/unicorn/filename-case": "off"
+    }
   },
   "keywords": [],
   "author": "",
@@ -36,6 +48,8 @@
     "@types/babel__traverse": "7.0.9",
     "@types/jest": "25.2.1",
     "@types/node": "13.13.5",
+    "eslint": "7.0.0",
+    "eslint-plugin-caleb": "8.0.0",
     "jest": "26.0.1",
     "jest-circus": "26.0.1",
     "jest-watch-typeahead": "0.6.0",
