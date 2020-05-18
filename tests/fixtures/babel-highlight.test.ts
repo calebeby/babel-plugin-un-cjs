@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/@babel/highlight@7.0.0/lib/index.js
 
@@ -114,47 +114,16 @@ function highlight(code, options = {}) {
 test('babel-highlight', async () => {
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default = {};
-    import _chalk from 'chalk';
-    import _esutils from 'esutils';
-    import * as _jsTokens from 'js-tokens';
-    export { shouldHighlight };
-    _default.shouldHighlight = shouldHighlight;
-    export { getChalk };
-    _default.getChalk = getChalk;
-    export { highlight as default };
-    _default.default = highlight;
-
-    function _interopRequireDefault(obj) {
-      return obj && obj.__esModule ? obj : {
-        default: obj
-      };
-    }
-
-    function _interopRequireWildcard(obj) {
-      if (obj && obj.__esModule) {
-        return obj;
-      } else {
-        var newObj = {};
-
-        if (obj != null) {
-          for (var key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-              var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {};
-
-              if (desc.get || desc.set) {
-                Object.defineProperty(newObj, key, desc);
-              } else {
-                newObj[key] = obj[key];
-              }
-            }
-          }
-        }
-
-        newObj.default = obj;
-        return newObj;
-      }
-    }
+    "let _exports = {}
+    import * as _jsTokens from 'js-tokens'
+    import _esutils from 'esutils'
+    import _chalk from 'chalk'
+    export { shouldHighlight }
+    _exports.shouldHighlight = shouldHighlight
+    export { getChalk }
+    _exports.getChalk = getChalk
+    export default highlight
+    _exports.default = highlight
 
     function getDefs(chalk) {
       return {
@@ -166,47 +135,48 @@ test('babel-highlight', async () => {
         string: chalk.green,
         regex: chalk.magenta,
         comment: chalk.grey,
-        invalid: chalk.white.bgRed.bold
-      };
+        invalid: chalk.white.bgRed.bold,
+      }
     }
 
     function getTokenType(match) {
-      const [offset, text] = match.slice(-2);
+      const [offset, text] = match.slice(-2)
 
-      _jsTokens.matchToToken(match);
+      _jsTokens.matchToToken(match)
 
-      console.log(_esutils.keyword);
+      console.log(_esutils.keyword)
     }
 
     function highlightTokens(defs, text) {
-      return _jsTokens.default;
+      return _jsTokens.default
     }
 
     function shouldHighlight(options) {
-      return _chalk.supportsColor || options.forceColor;
+      return _chalk.supportsColor || options.forceColor
     }
 
     function getChalk(options) {
-      let chalk = _chalk;
+      let chalk = _chalk
 
       if (options.forceColor) {
         chalk = new _chalk.constructor({
           enabled: true,
-          level: 1
-        });
+          level: 1,
+        })
       }
 
-      return chalk;
+      return chalk
     }
 
     function highlight(code, options = {}) {
       if (shouldHighlight(options)) {
-        const chalk = getChalk(options);
-        const defs = getDefs(chalk);
-        return highlightTokens(defs, code);
+        const chalk = getChalk(options)
+        const defs = getDefs(chalk)
+        return highlightTokens(defs, code)
       } else {
-        return code;
+        return code
       }
-    }"
+    }
+    "
   `)
 })

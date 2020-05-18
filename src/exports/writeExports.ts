@@ -4,8 +4,13 @@ import { findParentProgramChild, generateIdentifier } from '../helpers'
 
 /** Retrieves export name and value from an ExportPath */
 const getExportedValue = (path: ExportPath): NodePath<t.Expression> | false => {
-  // module.exports.foo = 'hi' or exports.foo = 'hi'
-  if (path.isAssignmentExpression()) return path.get('right')
+  // module.exports.foo = 'hi' or exports.foo = 'hi' or exports.foo = exports.bar = 'hi'
+  if (path.isAssignmentExpression()) {
+    const right = path.get('right')
+    // recurse on right side if it is nested assignments
+    if (right.isAssignmentExpression()) return getExportedValue(right)
+    return right
+  }
   // `foo: 'hi'` in `module.exports = {}`
   if (path.isObjectProperty()) {
     const v = path.get('value')
@@ -50,7 +55,7 @@ export const writeExports = (
   namedExports: NamedExportsMap,
 ) => {
   const modulePathsArray = [...modulePathsToReplace]
-  const exportObjectId = programPath.scope.generateUidIdentifier('_default')
+  const exportObjectId = programPath.scope.generateUidIdentifier('_exports')
 
   // PLEASE NOTE, DO NOT FORGET:
   // exports = ... DOES NOTHING
@@ -61,11 +66,10 @@ export const writeExports = (
 
   // create a _default object to use instead of module.exports and exports
   if (modulePathsArray.length !== 0) {
-    const emptyObject = t.objectExpression([])
     /** Each of these nodes is module.exports = ... */
     const directAssignmentsToExportObject = modulePathsArray
-      .map(p => {
-        // exports = ... does nothing in node, see the big comment above
+      .map((p) => {
+        // exports = ... does nothing in node, see the big loud comment above
         if (p.isIdentifier() && p.node.name === 'exports') return
         const parent = p.parentPath
         if (!parent.isAssignmentExpression()) return
@@ -93,7 +97,7 @@ export const writeExports = (
         // But this results in an assignment of _default.foo = 'hi' _before_ _default exists
         directAssignmentsToExportObject.length === 1
           ? directAssignmentsToExportObject[0].node.right
-          : emptyObject,
+          : t.objectExpression([]),
       ),
     ])
 
@@ -115,27 +119,32 @@ export const writeExports = (
         newDeclaration,
       )[0] as NodePath<typeof newDeclaration>
     }
-    if (!namedExports.get('default'))
+    // If it was module.exports = foo, it will be handled within the loop through namedExports
+    // If it was module.exports = () => {} or another non-identifier, it will be handled here.
+    const existingDefaultExport = namedExports.get('default')
+    const existingDefaultExportValue =
+      existingDefaultExport && getExportedValue(existingDefaultExport)
+    const hasDefaultExportIdentifierAlready =
+      existingDefaultExportValue && existingDefaultExportValue.isIdentifier()
+    if (!hasDefaultExportIdentifierAlready)
       // Add export default _default at the bottom
       programBody[programBody.length - 1].insertAfter(
         t.exportDefaultDeclaration(exportObjectId),
       )
     newDeclarationPath.scope.registerDeclaration(newDeclarationPath)
-    modulePathsArray.forEach(path => {
+    modulePathsArray.forEach((path) => {
       path.replaceWith(exportObjectId)
     })
   }
 
-  /**
-   * 1. Go through all the exports
-   * 2. Add a named export above in the top scope
-   * 3. Replace the value with a reference to the named export
-   *
-   * @example
-   * _default.foo = 'bar' // 1
-   * export const foo = 'bar'; _default.foo = 'bar' // 2
-   * export const foo = 'bar'; _default.foo = foo // 3
-   */
+  // 1. Go through all the exports
+  // 2. Add a named export above in the top scope
+  // 3. Replace the value with a reference to the named export
+  //
+  // @example
+  // _default.foo = 'bar' // 1
+  // export const foo = 'bar'; _default.foo = 'bar' // 2
+  // export const foo = 'bar'; _default.foo = foo // 3
   namedExports.forEach((assignment, exportName) => {
     const programChild = findParentProgramChild(assignment)
     const value = getExportedValue(assignment)
@@ -153,16 +162,20 @@ export const writeExports = (
     }
 
     if (value.isIdentifier()) {
-      // if it is `module.exports.foo = asdf`, we can do `export { asdf as foo }`
+      // if it is `module.exports.foo = asdf`, we can do export { asdf as foo }
+      // if it is `module.exports.default = asdf`, we can do export default asdf
       programChild.insertBefore(
-        t.exportNamedDeclaration(undefined, [
-          t.exportSpecifier(value.node, t.identifier(exportName)),
-        ]),
+        exportName === 'default'
+          ? t.exportDefaultDeclaration(value.node)
+          : t.exportNamedDeclaration(undefined, [
+              t.exportSpecifier(value.node, t.identifier(exportName)),
+            ]),
       )
-    } else {
+    } else if (exportName !== 'default') {
       const newId = generateIdentifier(programChild.scope, exportName)
       if (!value.isExpression()) return
-      // if the export name is available in the global scope, we can do export const foo = 'bar'
+      // if the export name is available in the global scope,
+      // we can do export const foo = 'bar'
       if (newId.name === exportName) {
         const exportDeclaration = t.exportNamedDeclaration(
           t.variableDeclaration('const', [
@@ -177,7 +190,8 @@ export const writeExports = (
         newPath.scope.registerDeclaration(newPath)
         value.replaceWith(newId)
       } else {
-        // export name is not available in the global scope, so we must do const _foo = ...; export { _foo as foo }
+        // export name is not available in the global scope,
+        // so we must do const _foo = ...; export { _foo as foo }
         const varDeclaration = t.variableDeclaration('const', [
           t.variableDeclarator(newId, value.node),
         ])

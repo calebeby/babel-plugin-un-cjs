@@ -1,4 +1,5 @@
 import { types as t, NodePath, Visitor } from '@babel/core'
+import { getRequirePath, isModuleExports, isExports } from '../helpers'
 
 // Handle transforming babel export * from "" blocks like this:
 // var _waitFor = require("./wait-for");
@@ -12,7 +13,7 @@ import { types as t, NodePath, Visitor } from '@babel/core'
 //     }
 //   });
 // });
-export const handlePotentialWildcardExport = (
+export const handlePotentialBabelWildcardExport = (
   path: NodePath<t.CallExpression>,
   visitor: Visitor<{}>,
 ) => {
@@ -74,4 +75,25 @@ export const handlePotentialWildcardExport = (
   const exportStarStatement = t.exportAllDeclaration(importSource)
   importStatement.replaceWith(exportStarStatement)
   loop.remove()
+}
+
+export const handleTSWildcardExport = (path: NodePath<t.CallExpression>) => {
+  // __exportStar(require('foo'), exports)
+  if (path.node.arguments.length !== 2) return
+  const requireArgument = path.node.arguments[0]
+  const exportObjectArgument = path.node.arguments[1]
+  const requirePath = getRequirePath(requireArgument)
+  if (!requirePath) return
+  if (
+    !(isModuleExports(exportObjectArgument) || isExports(exportObjectArgument))
+  )
+    return
+  const expressionStatement = path.parentPath
+  if (!expressionStatement.isExpressionStatement()) return
+  const exportNamespaceDeclaration = t.exportAllDeclaration(requirePath)
+  // Using insertAfter + remove rather than replaceWith
+  // so that the NodePath gets removed
+  // so that the require ->import transform doesn't run on the removed node
+  expressionStatement.insertAfter(exportNamespaceDeclaration)
+  expressionStatement.remove()
 }

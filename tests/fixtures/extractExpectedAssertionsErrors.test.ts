@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/expect@24.8.0/build/extractExpectedAssertionsErrors.js
 
@@ -48,39 +48,45 @@ exports.default = _default;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "let _default2 = {};
-    import { setState, getState } from './jestMatchersObject';
-    import { EXPECTED_COLOR, pluralize, RECEIVED_COLOR } from 'jest-matcher-utils';
-    _default2.default = void 0;
+    "let _exports = {}
+    import * as _jestMatcherUtils from 'jest-matcher-utils'
+    import * as _jestMatchersObject from './jestMatchersObject'
 
     const resetAssertionsLocalState = () => {
-      (0, setState)();
-    };
+      _jestMatchersObject.setState()
+    }
 
     const extractExpectedAssertionsErrors = () => {
-      const _getState = (0, getState)(),
-            assertionCalls = _getState.assertionCalls,
-            expectedAssertionsNumber = _getState.expectedAssertionsNumber,
-            expectedAssertionsNumberError = _getState.expectedAssertionsNumberError,
-            isExpectingAssertions = _getState.isExpectingAssertions,
-            isExpectingAssertionsError = _getState.isExpectingAssertionsError;
+      const _getState = _jestMatchersObject.getState(),
+        assertionCalls = _getState.assertionCalls,
+        expectedAssertionsNumber = _getState.expectedAssertionsNumber,
+        expectedAssertionsNumberError = _getState.expectedAssertionsNumberError,
+        isExpectingAssertions = _getState.isExpectingAssertions,
+        isExpectingAssertionsError = _getState.isExpectingAssertionsError
 
-      resetAssertionsLocalState();
+      resetAssertionsLocalState()
 
-      if (typeof expectedAssertionsNumber === 'number' && assertionCalls !== expectedAssertionsNumber) {
-        const numOfAssertionsExpected = (0, EXPECTED_COLOR)((0, pluralize)('assertion', expectedAssertionsNumber));
+      if (
+        typeof expectedAssertionsNumber === 'number' &&
+        assertionCalls !== expectedAssertionsNumber
+      ) {
+        const numOfAssertionsExpected = _jestMatcherUtils.EXPECTED_COLOR(
+          _jestMatcherUtils.pluralize('assertion', expectedAssertionsNumber),
+        )
       }
 
       if (isExpectingAssertions && assertionCalls === 0) {
-        const expected = (0, EXPECTED_COLOR)('at least one assertion');
-        const received = (0, RECEIVED_COLOR)('received none');
+        const expected = _jestMatcherUtils.EXPECTED_COLOR('at least one assertion')
+
+        const received = _jestMatcherUtils.RECEIVED_COLOR('received none')
       }
 
-      return result;
-    };
+      return result
+    }
 
-    var _default = extractExpectedAssertionsErrors;
-    export { _default as default };
-    _default2.default = _default;"
+    var _default = extractExpectedAssertionsErrors
+    export default _default
+    _exports.default = _default
+    "
   `)
 })

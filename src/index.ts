@@ -2,13 +2,23 @@ import { declare } from '@babel/helper-plugin-utils'
 import { types as t, NodePath, Visitor } from '@babel/core'
 import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
-import { handleNamedImport } from './imports/handleNamedImport'
+import { handleRequire } from './imports/handleRequire'
 import { handleWildcardImport } from './imports/handleWildcardImport'
-import { pathsToRemove, isTopLevel, isModuleExports } from './helpers'
-import { handlePotentialExport } from './exports/handlePotentialExport'
+import {
+  pathsToRemove,
+  isModuleExports,
+  isStillInTree,
+  isDefaultImportHelper,
+  isNamespaceImportHelper,
+  isInteropHelper,
+} from './helpers'
+import { handleAssignmentExpression } from './exports/handleAssignmentExpression'
 import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
-import { handlePotentialLazyImportFunction } from './handlePotentialLazyImportFunction'
-import { handlePotentialWildcardExport } from './exports/handlePotentialWildcardExport'
+import { handlePotentialLazyImportFunction } from './imports/handlePotentialLazyImportFunction'
+import {
+  handlePotentialBabelWildcardExport,
+  handleTSWildcardExport,
+} from './exports/handlePotentialWildcardExport'
 
 /**
  * NodePath of:
@@ -32,7 +42,7 @@ export type ModulePathsToReplace = Set<
   NodePath<t.Identifier | t.MemberExpression>
 >
 
-export default declare(api => {
+const babelPluginUnCjs = declare((api) => {
   api.assertVersion(7)
 
   const namedExports: NamedExportsMap = new Map()
@@ -43,8 +53,9 @@ export default declare(api => {
     Program: {
       exit(programPath) {
         if (!bail) {
-          Array.from(pathsToRemove.values()).forEach(p => p.remove())
-          writeExports(programPath, modulePathsToReplace, namedExports)
+          Array.from(pathsToRemove.values()).forEach((p) => p.remove())
+          if (namedExports.size !== 0)
+            writeExports(programPath, modulePathsToReplace, namedExports)
         }
 
         // reset state
@@ -57,6 +68,8 @@ export default declare(api => {
 
     CallExpression(path) {
       const { node } = path
+      // (path.removed on a node does not reflect ancestor removal)
+      if (!isStillInTree(path)) return
       handlePotentialObjectDefineProperty(path, namedExports)
       if (!t.isIdentifier(node.callee)) {
         // Handle transforming babel export * from "" blocks like this:
@@ -71,21 +84,30 @@ export default declare(api => {
         //     }
         //   });
         // });
-        handlePotentialWildcardExport(path, visitor)
+        handlePotentialBabelWildcardExport(path, visitor)
         return
       }
-      if (
-        node.callee.name.match(/interopRequireDefault/) ||
-        node.callee.name === '__importDefault'
-      ) {
+      if (isDefaultImportHelper(node.callee.name)) {
         handleDefaultImport(path)
-      } else if (
-        node.callee.name.match(/interopRequireWildcard/) ||
-        node.callee.name === '__importStar'
-      ) {
+      } else if (isNamespaceImportHelper(node.callee.name)) {
         handleWildcardImport(path)
+      } else if (node.callee.name === '__exportStar') {
+        handleTSWildcardExport(path)
       } else if (node.callee.name === 'require') {
-        handleNamedImport(path)
+        handleRequire(path)
+      }
+    },
+
+    SequenceExpression(path) {
+      //  Babel commonjs will transpile foo() to ;(0, _foo)()
+      //  Replaces (0, _foo) with _foo
+
+      const isLength2 = path.node.expressions.length === 2
+      const firstElement = path.node.expressions[0]
+      const secondElement = path.node.expressions[1]
+      if (isLength2 && t.isLiteral(firstElement)) {
+        path.replaceWith(secondElement)
+        return
       }
     },
 
@@ -98,12 +120,25 @@ export default declare(api => {
         } else {
           modulePathsToReplace.add(path)
         }
-      } else if (path.node.name === 'global') {
-        path.replaceWith(t.identifier('window'))
+      }
+    },
+
+    Directive(path) {
+      // Since we are converting to ESM, the "use strict" directive is not needed
+      if (path.node.value.value === 'use strict') path.remove()
+    },
+
+    VariableDeclarator(path) {
+      if (t.isIdentifier(path.node.id) && isInteropHelper(path.node.id.name)) {
+        path.remove()
       }
     },
 
     FunctionDeclaration(path) {
+      if (path.node.id && isInteropHelper(path.node.id.name)) {
+        path.remove()
+        return
+      }
       // Handle transforming babel lazy import blocks like this:
       // function _parser() {
       //   const data = require("@babel/parser");
@@ -116,37 +151,11 @@ export default declare(api => {
     },
 
     AssignmentExpression(path) {
-      const { node } = path
-
-      if (bail) return
-
-      // We must bail if there is a non-static export
-
-      if (!isTopLevel(path)) {
-        // assignment that is not in the top-level program
-        // we want to see if module.exports or exports is modified
-        // if it is, we bail on all exports modifications in this file
-
-        if (t.isIdentifier(node.left)) {
-          if (node.left.name === 'exports') bail = true
-        } else {
-          // there are cases where this will think that module is getting modified but it actually isn't
-          // for example (module ? obj1 : obj2).exports = 'false' will never modify module.exports
-          // but that is too complicated to handle for now.
-          path.get('left').traverse({
-            Identifier(path) {
-              if (path.node.name === 'module') bail = true
-            },
-          })
-        }
-        // regardless of whether we are bailing on exports modifications in the entire file,
-        // we do not need to continue for this assignment because it is not in the top level
-        return
-      }
-
-      handlePotentialExport(path, modulePathsToReplace, namedExports)
+      handleAssignmentExpression(path, modulePathsToReplace, namedExports)
     },
   }
 
   return { visitor }
 })
+
+export default babelPluginUnCjs

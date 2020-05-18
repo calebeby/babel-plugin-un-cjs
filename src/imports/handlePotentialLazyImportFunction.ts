@@ -1,5 +1,5 @@
 import { types as t, NodePath } from '@babel/core'
-import { generateIdentifier } from './helpers'
+import { generateIdentifier } from '../helpers'
 
 export const handlePotentialLazyImportFunction = (
   path: NodePath<t.FunctionDeclaration>,
@@ -21,7 +21,7 @@ export const handlePotentialLazyImportFunction = (
   const binding = path.scope.getBinding(funcName)
   if (!binding) return
   // If the function is referenced in a way that is different from `foo().bar`, then we bail
-  const hasInvalidReference = binding.referencePaths.some(ref => {
+  const hasInvalidReference = binding.referencePaths.some((ref) => {
     const parent = ref.parentPath
     if (!parent.isCallExpression()) return true
     const grandparent = parent.parentPath
@@ -94,12 +94,11 @@ export const handlePotentialLazyImportFunction = (
   if (!newBinding) return
 
   // Replace all instances of _parser().foo with newId.foo
-  binding.referencePaths.forEach(ref => {
+  binding.referencePaths.forEach((ref) => {
     const parent = ref.parentPath
     if (!parent.isCallExpression()) return
     parent.replaceWith(newId)
-    newBinding.referencePaths.push(parent)
-    newBinding.references++
-    newBinding.referenced = true
+    // @ts-expect-error
+    newBinding.reference(parent)
   })
 }

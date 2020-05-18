@@ -1,4 +1,4 @@
-import transform from '../test-util'
+import transform from '../../test-util'
 
 // based on https://unpkg.com/regex-not@1.0.2/index.js
 
@@ -23,24 +23,21 @@ module.exports = toRegex;
 `
   const transformed = await transform(input)
   expect(transformed).toMatchInlineSnapshot(`
-    "'use strict';
-
-    import _safe from 'safe-regex';
-    import _extend from 'extend-shallow';
+    "import extend from 'extend-shallow'
+    import safe from 'safe-regex'
 
     function toRegex(pattern, options) {
-      return new RegExp(toRegex.create(pattern, options));
+      return new RegExp(toRegex.create(pattern, options))
     }
 
     export const create = function (pattern, options) {
-      _extend(foo, bar);
-
-      _safe(blah);
-
-      return 'blah';
-    };
-    toRegex.create = create;
-    let _default = toRegex;
-    export default _default;"
+      extend(foo, bar)
+      safe(blah)
+      return 'blah'
+    }
+    toRegex.create = create
+    let _exports = toRegex
+    export default _exports
+    "
   `)
 })

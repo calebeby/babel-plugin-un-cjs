@@ -1,0 +1,4 @@
+- module.exports.foo += 5
+- module.exports += 5
+- js-cookie (webpack bundle published to npm 😢)
+- handle exports[foo] and module.exports = { [foo]: 'bar' }
