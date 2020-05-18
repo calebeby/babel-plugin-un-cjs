@@ -17,8 +17,8 @@
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "build:watch": "rollup --watch -c rollup.config.js",
-    "type": "tsc",
-    "type:watch": "tsc --watch",
+    "type": "tsc --noEmit",
+    "type:watch": "tsc --noEmit --watch",
     "test": "jest",
     "format": "prettier --write .",
     "test:watch": "jest --watch",
