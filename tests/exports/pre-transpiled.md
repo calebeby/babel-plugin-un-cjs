@@ -225,3 +225,74 @@ to
 ```js
 export * from 'foo'
 ```
+
+# (skip) Transforms TS/babel's export {foo} from ""
+
+Pre-TS/babel input:
+
+```js
+export { foo as default, bar } from 'asdf'
+```
+
+Babel and TS handle this the exact same way
+
+```js
+'use strict'
+
+Object.defineProperty(exports, 'default', {
+  enumerable: true,
+  get: function () {
+    return _asdf.foo
+  },
+})
+Object.defineProperty(exports, 'bar', {
+  enumerable: true,
+  get: function () {
+    return _asdf.bar
+  },
+})
+
+var _asdf = require('asdf')
+```
+
+to
+
+```js
+let _exports = {}
+import * as _asdf from 'asdf'
+const _default = _asdf.foo
+_exports.default = _default
+export default _default
+export const bar = _asdf.bar
+_exports.bar = _asdf.bar
+```
+
+# (skip) Transforms babel's export {foo} from "" with loose: true
+
+Pre-babel input:
+
+```js
+export { foo as default, bar } from 'asdf'
+```
+
+```js
+'use strict'
+
+exports.bar = exports.default = void 0
+
+var _asdf = require('asdf')
+
+exports.default = _asdf.foo
+exports.bar = _asdf.bar
+```
+
+to
+
+```js
+let _exports = {}
+import * as _asdf from 'asdf'
+_exports.default = _asdf.foo
+export const bar = _asdf.bar
+_exports.bar = bar
+export default _exports
+```
