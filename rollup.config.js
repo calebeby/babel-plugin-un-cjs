@@ -11,7 +11,7 @@ export default [
       { file: 'dist/index.js', format: 'cjs' },
       { file: 'dist/index.mjs', format: 'esm' },
     ],
-    external: ['@babel/core', '@babel/helper-plugin-utils'],
+    external: ['@babel/core', '@babel/helper-plugin-utils', '@babel/generator'],
     plugins: [
       resolve({
         extensions: ['.js', '.ts'],
