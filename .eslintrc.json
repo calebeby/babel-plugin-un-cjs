@@ -1,0 +1,10 @@
+{
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "extends": ["plugin:caleb/recommended"],
+  "rules": {
+    "caleb/unicorn/filename-case": "off",
+    "complexity": "off"
+  }
+}
