@@ -2,10 +2,6 @@ import { NodePath, types as t } from '@babel/core'
 import { Scope } from '@babel/traverse'
 import generate from '@babel/generator'
 
-// we are storing them here instead of removing them right away in case we bail
-// on export modification
-export const pathsToRemove = new Set<NodePath>()
-
 /**
  * Given a node, checks to see if it matches require("...")
  * If it does, returns the require path within that expression
@@ -55,7 +51,7 @@ export const assignMaps = <Key, Val>(
 }
 
 /**
- * From a descendent, go up until you hit a direct child of the program path
+ * From a descendent, go up until you hit a direct child of the Program
  */
 export const findParentProgramChild = (path: NodePath) =>
   path.find((p) => p.parentPath.isProgram())
@@ -73,11 +69,11 @@ export const everyParent = (
 
 /** Returns whether a node is `module.exports` */
 export const isModuleExports = (node: t.Node): boolean =>
-  t.isMemberExpression(node) &&
-  t.isIdentifier(node.object) &&
-  node.object.name === 'module' &&
-  t.isIdentifier(node.property) &&
-  node.property.name === 'exports'
+  (t.isJSXMemberExpression(node) || t.isMemberExpression(node)) &&
+  (t.isIdentifier(node.object, { name: 'module' }) ||
+    t.isJSXIdentifier(node.object, { name: 'module' })) &&
+  (t.isIdentifier(node.property, { name: 'exports' }) ||
+    t.isJSXIdentifier(node.property, { name: 'exports' }))
 
 /** Returns whether a node is `exports` */
 export const isExports = (node: t.Node): boolean =>

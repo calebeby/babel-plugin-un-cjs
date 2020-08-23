@@ -1,5 +1,5 @@
 module.exports = {
-  testRegex: 'tests/.*\\.(md|ts|js)$',
+  testRegex: ['tests/.*\\.(md|ts|js)$', '.*\\.test\\.(md|ts|js)'],
   transform: {
     '\\.md$': './jest-transform',
     '\\.ts$': '@sucrase/jest-plugin',

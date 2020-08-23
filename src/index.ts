@@ -1,68 +1,39 @@
 import { declare } from '@babel/helper-plugin-utils'
 import { types as t, NodePath, Visitor } from '@babel/core'
-import { writeExports } from './exports/writeExports'
 import { handleDefaultImport } from './imports/handleDefaultImport'
 import { handleRequire } from './imports/handleRequire'
 import { handleWildcardImport } from './imports/handleWildcardImport'
 import {
-  pathsToRemove,
-  isModuleExports,
   isStillInTree,
   isDefaultImportHelper,
   isNamespaceImportHelper,
   isInteropHelper,
 } from './helpers'
-import { handleAssignmentExpression } from './exports/handleAssignmentExpression'
-import { handlePotentialObjectDefineProperty } from './handlePotentialObjectDefineProperty'
 import { handlePotentialLazyImportFunction } from './imports/handlePotentialLazyImportFunction'
 import {
   handlePotentialBabelWildcardExport,
   handleTSWildcardExport,
-} from './exports/handlePotentialWildcardExport'
+} from './exports/handleWildcardExport'
+import { handleExports } from './exports/handleExports'
+import { handleIdentifier } from './exports/handleIdentifier'
 
-/**
- * NodePath of:
- * - `AssignmentExpression`:
- *   - `module.exports.foo = 'bar'`
- *   - `exports.foo = 'bar'`
- * - `ObjectProperty` (within `module.exports = {}`):
- *   - `foo: 'bar'`
- * - `CallExpression`:
- *   - `Object.defineProperty(module.exports, 'foo', {
- *       get: function () { return 'bar' }
- *     })`
- */
-export type ExportPath =
-  | NodePath<t.AssignmentExpression>
-  | NodePath<t.ObjectProperty>
-  | NodePath<t.CallExpression>
-
-export type NamedExportsMap = Map<string, ExportPath>
-export type ModulePathsToReplace = Set<
-  NodePath<t.Identifier | t.MemberExpression>
->
+export interface State {
+  /** Array of _all_ identifier paths which reference `module` or `exports` */
+  referencesToExports: NodePath<t.Identifier | t.JSXIdentifier>[]
+}
 
 const babelPluginUnCjs = declare((api) => {
   api.assertVersion(7)
 
-  const namedExports: NamedExportsMap = new Map()
-  const modulePathsToReplace: ModulePathsToReplace = new Set()
+  let state: State = {
+    referencesToExports: [],
+  }
 
-  let bail = false
   const visitor: Visitor = {
     Program: {
       exit(programPath) {
-        if (!bail) {
-          ;[...pathsToRemove.values()].forEach((p) => p.remove())
-          if (namedExports.size !== 0)
-            writeExports(programPath, modulePathsToReplace, namedExports)
-        }
-
-        // reset state
-        bail = false
-        pathsToRemove.clear()
-        namedExports.clear()
-        modulePathsToReplace.clear()
+        handleExports(programPath, state)
+        state = { referencesToExports: [] }
       },
     },
 
@@ -70,7 +41,6 @@ const babelPluginUnCjs = declare((api) => {
       const { node } = path
       // (path.removed on a node does not reflect ancestor removal)
       if (!isStillInTree(path)) return
-      handlePotentialObjectDefineProperty(path, namedExports)
       if (!t.isIdentifier(node.callee)) {
         // Handle transforming babel export * from "" blocks like this:
         // var _waitFor = require("./wait-for");
@@ -111,14 +81,10 @@ const babelPluginUnCjs = declare((api) => {
     },
 
     Identifier(path) {
-      if (path.node.name !== 'exports') return
-      const parent = path.parentPath
-      // If the parent is module.exports, use that instead of just exports
-      if (parent.isMemberExpression() && isModuleExports(parent.node)) {
-        modulePathsToReplace.add(parent)
-      } else {
-        modulePathsToReplace.add(path)
-      }
+      handleIdentifier(path, state)
+    },
+    JSXIdentifier(path) {
+      handleIdentifier(path, state)
     },
 
     Directive(path) {
@@ -146,10 +112,6 @@ const babelPluginUnCjs = declare((api) => {
       //   return data;
       // }
       handlePotentialLazyImportFunction(path)
-    },
-
-    AssignmentExpression(path) {
-      handleAssignmentExpression(path, modulePathsToReplace, namedExports)
     },
   }
 
