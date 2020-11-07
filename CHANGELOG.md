@@ -1,5 +1,13 @@
 # babel-plugin-un-cjs
 
+## 2.2.1
+
+### Patch Changes
+
+- [`ec2f33b`](https://github.com/calebeby/babel-plugin-un-cjs/commit/ec2f33b728b3f59149299ab570cddff3af290310) Thanks [@calebeby](https://github.com/calebeby)! - Handle changed babel output for `export * from ""`
+
+  The change was introduced in babel PR https://github.com/babel/babel/pull/11739. This was first released as babel v7.12.0. Both the old and new output are supported by babel-plugin-un-cjs
+
 ## 2.2.0
 
 ### Minor Changes
