@@ -1,11 +1,17 @@
 import { types as t, NodePath, Visitor } from '@babel/core'
-import { getRequirePath, isModuleExports, isExports } from '../helpers'
+import {
+  getRequirePath,
+  isModuleExports,
+  isExports,
+  toString,
+} from '../helpers'
 
 // Handle transforming babel export * from "" blocks like this:
 // var _waitFor = require("./wait-for");
 // Object.keys(_waitFor).forEach(function (key) {
 //   if (key === "default" || key === "__esModule") return;
 //   if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+//   if (key in exports && exports[key] === _foo[key]) return; // only in newer babel versions, introduced in https://github.com/babel/babel/pull/11739
 //   Object.defineProperty(exports, key, {
 //     enumerable: true,
 //     get: function () {
@@ -43,7 +49,14 @@ export const handlePotentialBabelWildcardExport = (
   const loopCallbackStatements = loopCallback.node.body.body
   // Sometimes there will be 3 statements, sometimes 2
   // When there are 3 statements, the extra one is a the check against _exportNames
-  if (loopCallbackStatements.length === 3) {
+  // In newer babel versions (introduced in https://github.com/babel/babel/pull/11739)
+  // there can be up to 4 statements since there is an extra conditional
+  if (loopCallbackStatements.length === 4) {
+    if (!t.isIfStatement(loopCallbackStatements[0])) return
+    if (!t.isIfStatement(loopCallbackStatements[1])) return
+    if (!t.isIfStatement(loopCallbackStatements[2])) return
+    if (!t.isExpressionStatement(loopCallbackStatements[3])) return
+  } else if (loopCallbackStatements.length === 3) {
     if (!t.isIfStatement(loopCallbackStatements[0])) return
     if (!t.isIfStatement(loopCallbackStatements[1])) return
     if (!t.isExpressionStatement(loopCallbackStatements[2])) return

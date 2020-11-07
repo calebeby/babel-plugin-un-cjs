@@ -158,6 +158,54 @@ to
 export * from 'foo'
 ```
 
+# Transforms babel's `export * from ""` with exportNames
+
+When there are exports in addition to the namespace export, babel uses an `_exportNames` variable so that locally-exported variables have export precedence over namespace-exported variables
+
+Pre-babel input:
+
+```js
+export * from 'foo'
+export const asdf = ''
+```
+
+```js
+var _exportNames = {
+  asdf: true,
+}
+exports.asdf = void 0
+
+var _foo = require('foo')
+
+Object.keys(_foo).forEach(function (key) {
+  if (key === 'default' || key === '__esModule') return
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return
+  if (key in exports && exports[key] === _foo[key]) return
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _foo[key]
+    },
+  })
+})
+const asdf = ''
+exports.asdf = asdf
+```
+
+to
+
+```js
+let _exports = {}
+export * from 'foo'
+var _exportNames = {
+  asdf: true,
+}
+const asdf = ''
+export { asdf }
+_exports.asdf = asdf
+export default _exports
+```
+
 # Transforms babel's export \* from "" with loose: true
 
 Pre-babel input:
