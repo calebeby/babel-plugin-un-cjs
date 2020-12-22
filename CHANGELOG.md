@@ -1,5 +1,11 @@
 # babel-plugin-un-cjs
 
+## 2.3.0
+
+### Minor Changes
+
+- [`4c1f3a5`](https://github.com/calebeby/babel-plugin-un-cjs/commit/4c1f3a5bb6193fa8c696583783d63222dd9a235e) Thanks [@calebeby](https://github.com/calebeby)! - Improve handling of assigning directly to module.exports = ...
+
 ## 2.2.1
 
 ### Patch Changes
