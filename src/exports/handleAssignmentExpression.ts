@@ -5,7 +5,6 @@ import {
   assignMaps,
   isModuleExports,
   isValidIdentiferName,
-  toString,
   getRequirePath,
 } from '../helpers'
 
