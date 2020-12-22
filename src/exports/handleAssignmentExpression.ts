@@ -1,7 +1,13 @@
 import { NodePath, types as t } from '@babel/core'
 import { ModulePathsToReplace, NamedExportsMap } from '..'
 import { Binding } from '@babel/traverse'
-import { assignMaps, isModuleExports, isValidIdentiferName } from '../helpers'
+import {
+  assignMaps,
+  isModuleExports,
+  isValidIdentiferName,
+  toString,
+  getRequirePath,
+} from '../helpers'
 
 /**
  * Collects all property assignments to create a map of named exports
@@ -186,7 +192,11 @@ export const handleAssignmentExpression = (
         // if the referenced variable is an object literal, grab all the properties and make them exports
         if (init.isObjectExpression()) {
           assignMaps(namedExports, getNamedExportsFromObject(init))
+        } else {
+          namedExports.set('default', path)
         }
+      } else {
+        namedExports.set('default', path)
       }
       // look up where properties are set on referenced object and use them as named exports
       assignMaps(
@@ -198,8 +208,16 @@ export const handleAssignmentExpression = (
       // grab all properties and make them named exports
       assignMaps(namedExports, getNamedExportsFromObject(right))
     } else {
+      // check for module.exports = require('asdf')
+      const requirePath = getRequirePath(right.node)
+      if (requirePath) {
+        path.insertAfter(t.exportAllDeclaration(requirePath))
+        path.remove()
+        return
+      }
+
       // assigning module.exports = ...
-      // and the right side is not an identifier or an object
+      // and the right side is not an identifier or an object or a require
       namedExports.set('default', path)
     }
   } else {

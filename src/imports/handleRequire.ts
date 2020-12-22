@@ -6,6 +6,7 @@ import {
   injectImportIntoBody,
   updateReferencesTo,
   importPathNameToIdentifierName,
+  isModuleExports,
 } from '../helpers'
 
 export const handleRequire = (path: NodePath<t.CallExpression>) => {
@@ -131,7 +132,7 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   }
 
   // const foo = require('bar')
-  // Three possible situations here:
+  // Four possible situations here:
   // 1. Never using foo directly, only properties like foo.bar and foo.baz:
   //    -> import * as foo from 'bar'
   // 2. Uses foo directly, and may additionally use properties (or foo is not used at all, directly or on a sub-property)
@@ -140,6 +141,9 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   //    How do we know if something is meant to be a property of the default export vs a separate export?
   // 3. Every place where foo is used is foo.default. This is the output of babel transform commonjs with noInterop: true
   //    -> import foo from 'bar', and change all references from foo.default to foo
+  // 4. It is only used as module.exports: const foo = require('./foo'); module.exports = foo
+  //    Example in real life: https://github.com/testing-library/jest-dom/blob/v5.11.6/matchers.js
+  //    -> export * from 'foo'
 
   const originalBinding = path.scope.getBinding(originalId.name)
   if (!originalBinding) return
@@ -147,6 +151,18 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   path.scope.removeBinding(originalId.name)
   const localId = generateIdentifier(path.scope, originalId)
   path.parentPath.remove()
+
+  // Special case: check for if the only reference is module.exports = imported
+  if (references.length === 1) {
+    const ref = references[0]
+    const assignment = ref.parentPath
+    if (
+      assignment.isAssignmentExpression() &&
+      isModuleExports(assignment.node.left)
+    ) {
+      assignment.insertBefore(t.exportAllDeclaration(importString))
+    }
+  }
 
   const usesDefaultOnly = references.every((ref) => {
     const memberExp = ref.parent

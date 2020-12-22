@@ -104,8 +104,8 @@ module.exports = main
 
         export const other = 'hiiiii'
         main.other = other
+        export default main
         let _exports = main
-        export default _exports
         "
       `)
     })

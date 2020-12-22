@@ -41,3 +41,83 @@ let _exports = class {}
 
 export default _exports
 ```
+
+# Assign module.exports = id => function
+
+```js
+function eq(value, other) {}
+
+module.exports = eq
+```
+
+to
+
+```js
+function eq(value, other) {}
+
+export default eq
+let _exports = eq
+```
+
+# Assign module.exports = id => class
+
+```js
+class eq {}
+
+module.exports = eq
+```
+
+to
+
+```js
+class eq {}
+
+export default eq
+let _exports = eq
+```
+
+# Assign module.exports = id => assignment
+
+```js
+let meaningOfLife = 42
+meaningOfLife = 'jk'
+
+module.exports = meaningOfLife
+```
+
+to
+
+```js
+let meaningOfLife = 42
+meaningOfLife = 'jk'
+export default meaningOfLife
+let _exports = meaningOfLife
+```
+
+# Assign module.exports = id => require
+
+```js
+const matchers = require('./dist/matchers')
+module.exports = matchers
+```
+
+to
+
+```js
+import matchers from './dist/matchers'
+export * from './dist/matchers'
+export default matchers
+let _exports = matchers
+```
+
+# Assign module.exports = require
+
+```js
+module.exports = require('./dist/matchers')
+```
+
+to
+
+```js
+export * from './dist/matchers'
+```
