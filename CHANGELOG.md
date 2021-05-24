@@ -1,5 +1,11 @@
 # babel-plugin-un-cjs
 
+## 2.4.0
+
+### Minor Changes
+
+- [`345f7ee`](https://github.com/calebeby/babel-plugin-un-cjs/commit/345f7ee1d1b9a9090035024bc18cc70e48c0b437) Thanks [@calebeby](https://github.com/calebeby)! - Handle babel-generated "export {...} from "..."
+
 ## 2.3.0
 
 ### Minor Changes
