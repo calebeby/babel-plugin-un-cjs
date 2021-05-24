@@ -7,7 +7,6 @@ import {
   updateReferencesTo,
   importPathNameToIdentifierName,
   isModuleExports,
-  toString,
   isExports,
   isStillInTree,
 } from '../helpers'
