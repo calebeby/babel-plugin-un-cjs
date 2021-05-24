@@ -94,7 +94,7 @@ const babelPluginUnCjs = declare((api) => {
       } else if (node.callee.name === '__exportStar') {
         handleTSWildcardExport(path)
       } else if (node.callee.name === 'require') {
-        handleRequire(path)
+        handleRequire(path, namedExports)
       }
     },
 

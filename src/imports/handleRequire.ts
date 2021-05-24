@@ -7,9 +7,17 @@ import {
   updateReferencesTo,
   importPathNameToIdentifierName,
   isModuleExports,
+  toString,
+  isExports,
+  isStillInTree,
 } from '../helpers'
+import { NamedExportsMap } from '..'
+import { isObjectDefinePropertyExport } from '../handlePotentialObjectDefineProperty'
 
-export const handleRequire = (path: NodePath<t.CallExpression>) => {
+export const handleRequire = (
+  path: NodePath<t.CallExpression>,
+  namedExports: NamedExportsMap,
+) => {
   const { node } = path
   const importString = getRequirePath(node)
   if (!importString) return
@@ -135,6 +143,9 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
   // Four possible situations here:
   // 1. Never using foo directly, only properties like foo.bar and foo.baz:
   //    -> import * as foo from 'bar'
+  //    Special sub-case: the sub-properties are only referenced in exports:
+  //      module.exports.asdf = foo.bar // or Object.defineProperty(exports, 'bar')
+  //      -> Should output export { foo } from 'bar'
   // 2. Uses foo directly, and may additionally use properties (or foo is not used at all, directly or on a sub-property)
   //    -> import foo from 'bar'
   //    To ponder: Should a second import (namespace import) be created for the properties?
@@ -194,6 +205,93 @@ export const handleRequire = (path: NodePath<t.CallExpression>) => {
       memberExp.replaceWith(localId)
     })
   } else {
+    // Case 1: Never using foo directly, only properties like foo.bar and foo.baz
+    // Check for special case where references are only in exports like
+    // module.exports.asdf = foo.bar // or Object.defineProperty(exports, 'bar')
+
+    if (
+      references.every((ref) => {
+        const parentCallExp = ref.findParent((p) =>
+          p.isCallExpression(),
+        ) as NodePath<t.CallExpression> | null
+        if (parentCallExp && isObjectDefinePropertyExport(parentCallExp))
+          return true
+        // foo.bar
+        const referenceMemberExp = ref.parentPath
+        if (!referenceMemberExp.isMemberExpression()) return false
+        // exports.asdf = foo.bar
+        const assignmentExp = referenceMemberExp.parentPath
+        if (!assignmentExp.isAssignmentExpression()) return false
+        // exports.asdf
+        const assignee = assignmentExp.get('left')
+        if (!assignee.isMemberExpression()) return false
+        // Make sure it is assigned on module.exports or exports
+        if (
+          !isExports(assignee.node.object) &&
+          !isModuleExports(assignee.node.object)
+        )
+          return false
+        // ex: console.log(exports.asdf = foo.bar)
+        // this is too complicated
+        // because we would need both an `import from` and `export from`
+        // so we are just falling through here
+        if (!assignmentExp.parentPath.isExpressionStatement()) return false
+        return true
+      })
+    ) {
+      references.forEach((ref) => {
+        // We know that each reference is either a direct assignment:
+        // exports.asdf = foo.bar
+        // or child of an Object.defineProperty:
+        // Object.defineProperty(exports, 'asdf', { ... })
+
+        // in the case of Object.defineProperty, this is not an assignment expression
+        const assignmentExp = ref.parentPath.parentPath
+
+        const programPath = getProgramPath(assignmentExp)
+
+        // bar
+        const importedId: t.Identifier = (ref.parent as t.MemberExpression)
+          .property
+        // asdf
+        let exportedId: t.Identifier
+
+        if (assignmentExp.isAssignmentExpression()) {
+          // case: exports.asdf = foo.bar
+          // asdf
+          exportedId = (assignmentExp.node.left as t.MemberExpression).property
+          assignmentExp.parentPath.remove()
+        } else {
+          const parentCallExp = ref.findParent((p) =>
+            p.isCallExpression(),
+          ) as NodePath<t.CallExpression>
+
+          // case: Object.defineProperty(exports, 'asdf', { ... })
+          const [exportedName] = isObjectDefinePropertyExport(
+            parentCallExp,
+          ) as Exclude<ReturnType<typeof isObjectDefinePropertyExport>, false>
+          exportedId = t.identifier(exportedName)
+          parentCallExp.remove()
+        }
+
+        const newExport = t.exportNamedDeclaration(
+          undefined,
+          [t.exportSpecifier(importedId, exportedId)],
+          importString,
+        )
+        programPath.pushContainer('body', newExport)
+
+        // Delete other things with the same export name
+        const existingExport = namedExports.get(exportedId.name)
+        if (existingExport) {
+          if (isStillInTree(existingExport)) existingExport.parentPath.remove()
+        }
+        namedExports.delete(exportedId.name)
+      })
+      return
+    }
+
+    // Not the special case
     updateReferencesTo(references, localId)
   }
 }

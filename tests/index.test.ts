@@ -13,11 +13,8 @@ Object.defineProperty(exports, "version", {
   `
     const transformed = await transform(input)
     expect(transformed).toMatchInlineSnapshot(`
-      "let _exports = {}
-      import * as _package from '../package.json'
-      export const version = _package.version
-      _exports.version = _package.version
-      export default _exports
+      "import * as _package from '../package.json'
+      export { version } from '../package.json'
       "
     `)
   })

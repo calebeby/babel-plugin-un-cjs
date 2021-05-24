@@ -63,8 +63,6 @@ test('babel', async () => {
     import _template from '@babel/template'
     export { Plugin }
     _exports.Plugin = Plugin
-    export const version = _package.version
-    _exports.version = _package.version
     export { _template as template }
     _exports.template = _template
     const DEFAULT_EXTENSIONS = Object.freeze(['.js', '.jsx', '.es6', '.es', '.mjs'])
@@ -86,6 +84,7 @@ test('babel', async () => {
       )
     }
 
+    export { version } from '../package.json'
     export default _exports
     "
   `)

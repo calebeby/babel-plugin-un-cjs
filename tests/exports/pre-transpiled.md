@@ -274,7 +274,7 @@ to
 export * from 'foo'
 ```
 
-# (skip) Transforms TS/babel's export {foo} from ""
+# Transforms TS/babel's export {foo} from ""
 
 Pre-TS/babel input:
 
@@ -306,16 +306,12 @@ var _asdf = require('asdf')
 to
 
 ```js
-let _exports = {}
 import * as _asdf from 'asdf'
-const _default = _asdf.foo
-_exports.default = _default
-export default _default
-export const bar = _asdf.bar
-_exports.bar = _asdf.bar
+export { foo as default } from 'asdf'
+export { bar } from 'asdf'
 ```
 
-# (skip) Transforms babel's export {foo} from "" with loose: true
+# Transforms babel's export {foo} from "" with loose: true
 
 Pre-babel input:
 
@@ -337,10 +333,35 @@ exports.bar = _asdf.bar
 to
 
 ```js
-let _exports = {}
 import * as _asdf from 'asdf'
-_exports.default = _asdf.foo
-export const bar = _asdf.bar
-_exports.bar = bar
-export default _exports
+export { foo as default } from 'asdf'
+export { bar } from 'asdf'
+```
+
+# (skip) Transforms babel's export {foo} from "" with loose: true and implicit default export
+
+This is missing the implicitly-created default export
+
+Pre-babel input:
+
+```js
+export { bar } from 'asdf'
+```
+
+```js
+'use strict'
+
+exports.__esModule = true
+exports.bar = void 0
+
+var _asdf = require('asdf')
+
+exports.bar = _asdf.bar
+```
+
+to
+
+```js
+import * as _asdf from 'asdf'
+export { bar } from 'asdf'
 ```
