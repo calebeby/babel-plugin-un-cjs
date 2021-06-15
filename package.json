@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-un-cjs",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "repository": "calebeby/babel-plugin-un-cjs",
   "description": "",
   "main": "./dist/index.js",

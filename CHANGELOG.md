@@ -1,5 +1,11 @@
 # babel-plugin-un-cjs
 
+## 2.5.0
+
+### Minor Changes
+
+- [`d61b766`](https://github.com/calebeby/babel-plugin-un-cjs/commit/d61b7665300e3bdbc01f90f7ce29b700d9f72310) Thanks [@calebeby](https://github.com/calebeby)! - Fix an edge case where `export * from ""` generated an extra import/export of default
+
 ## 2.4.0
 
 ### Minor Changes
