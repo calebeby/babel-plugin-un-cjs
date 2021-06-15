@@ -9,7 +9,6 @@ import {
   isModuleExports,
   isExports,
   isStillInTree,
-  toString,
 } from '../helpers'
 import { NamedExportsMap } from '..'
 import { isObjectDefinePropertyExport } from '../handlePotentialObjectDefineProperty'
