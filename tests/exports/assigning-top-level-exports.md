@@ -104,10 +104,7 @@ module.exports = matchers
 to
 
 ```js
-import matchers from './dist/matchers'
 export * from './dist/matchers'
-export default matchers
-let _exports = matchers
 ```
 
 # Assign module.exports = require

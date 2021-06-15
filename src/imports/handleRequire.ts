@@ -9,6 +9,7 @@ import {
   isModuleExports,
   isExports,
   isStillInTree,
+  toString,
 } from '../helpers'
 import { NamedExportsMap } from '..'
 import { isObjectDefinePropertyExport } from '../handlePotentialObjectDefineProperty'
@@ -171,6 +172,8 @@ export const handleRequire = (
       isModuleExports(assignment.node.left)
     ) {
       assignment.insertBefore(t.exportAllDeclaration(importString))
+      assignment.remove()
+      return
     }
   }
 
