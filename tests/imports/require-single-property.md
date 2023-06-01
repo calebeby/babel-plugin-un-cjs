@@ -36,13 +36,10 @@ to
 ```js
 import { foo as _S } from 'file'
 const S = 'dont override me'
-
 const main = () => {
   _S.asdf()
-
   console.log(<_S>Hi</_S>)
 }
-
 const other = () => {
   S.asdf()
 }
@@ -76,7 +73,6 @@ to
 ```js
 import { foo as _foo2 } from 'file'
 const foo = 'dont override me'
-
 const s = () => {
   const _foo = 'dont override me'
   console.log(_foo2)
@@ -117,10 +113,8 @@ to
 import { asdf as _asdf, b as _a } from 'module'
 const asdf = 'dont override me'
 const a = 'dont override me'
-
 while (asdf) {
   _asdf()
-
   _a.foo()
 }
 ```
@@ -153,7 +147,6 @@ to
 ```js
 import { foo as _foo } from 'file'
 const foo = 'dont override me'
-
 if (foo) {
   const { asdf } = _foo
 }

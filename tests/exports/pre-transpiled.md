@@ -25,14 +25,10 @@ to
 
 ```js
 let _exports = {}
-
 const foo = () => {}
-
 export { foo }
 _exports.foo = foo
-
 const asdf = () => {}
-
 var _default = asdf
 export default _default
 _exports.default = _default
@@ -62,9 +58,7 @@ to
 let _exports = {}
 export const foo = () => {}
 _exports.foo = foo
-
 const asdf = () => {}
-
 export default asdf
 _exports.default = asdf
 ```
@@ -90,9 +84,7 @@ to
 
 ```js
 let _exports = {}
-
 const foo = () => {}
-
 export { foo as asdf }
 export { foo }
 _exports.asdf = _exports.foo = foo

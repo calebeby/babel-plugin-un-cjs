@@ -79,10 +79,8 @@ to
 ```js
 import * as _myModule from 'my-module'
 const myModule = 'dont override me'
-
 if (myModule) {
   _myModule.foo()
-
   _myModule.bar()
 }
 ```
@@ -123,7 +121,6 @@ to
 import _s from 'file'
 const s = 'dont override me'
 const file = 'dont override me'
-
 const main = () => {
   _s()
 }
@@ -170,7 +167,6 @@ to
 
 ```js
 import _foobar2 from 'foo-bar'
-
 const foobar = () => {
   const _foobar = 'hi'
   console.log(_foobar2)
@@ -201,7 +197,6 @@ to
 
 ```js
 import hello from 'foo'
-
 const s = () => {}
 ```
 

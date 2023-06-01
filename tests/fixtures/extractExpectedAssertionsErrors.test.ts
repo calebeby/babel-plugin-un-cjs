@@ -51,11 +51,9 @@ exports.default = _default;
     "let _exports = {}
     import * as _jestMatcherUtils from 'jest-matcher-utils'
     import * as _jestMatchersObject from './jestMatchersObject'
-
     const resetAssertionsLocalState = () => {
       _jestMatchersObject.setState()
     }
-
     const extractExpectedAssertionsErrors = () => {
       const _getState = _jestMatchersObject.getState(),
         assertionCalls = _getState.assertionCalls,
@@ -63,9 +61,7 @@ exports.default = _default;
         expectedAssertionsNumberError = _getState.expectedAssertionsNumberError,
         isExpectingAssertions = _getState.isExpectingAssertions,
         isExpectingAssertionsError = _getState.isExpectingAssertionsError
-
       resetAssertionsLocalState()
-
       if (
         typeof expectedAssertionsNumber === 'number' &&
         assertionCalls !== expectedAssertionsNumber
@@ -74,16 +70,12 @@ exports.default = _default;
           _jestMatcherUtils.pluralize('assertion', expectedAssertionsNumber),
         )
       }
-
       if (isExpectingAssertions && assertionCalls === 0) {
         const expected = _jestMatcherUtils.EXPECTED_COLOR('at least one assertion')
-
         const received = _jestMatcherUtils.RECEIVED_COLOR('received none')
       }
-
       return result
     }
-
     var _default = extractExpectedAssertionsErrors
     export default _default
     _exports.default = _default

@@ -25,13 +25,10 @@ module.exports.default = exports.default
   expect(transformed).toMatchInlineSnapshot(`
     "let _exports = {}
     const defaults = {}
-
     var waitForExpect = function waitForExpect(expectation) {}
-
     var _default = Object.assign(waitForExpect, {
       defaults: defaults,
     })
-
     export default _default
     _exports.default = _default
     "

@@ -124,7 +124,6 @@ test('babel-highlight', async () => {
     _exports.getChalk = getChalk
     export default highlight
     _exports.default = highlight
-
     function getDefs(chalk) {
       return {
         keyword: chalk.cyan,
@@ -138,36 +137,27 @@ test('babel-highlight', async () => {
         invalid: chalk.white.bgRed.bold,
       }
     }
-
     function getTokenType(match) {
       const [offset, text] = match.slice(-2)
-
       _jsTokens.matchToToken(match)
-
       console.log(_esutils.keyword)
     }
-
     function highlightTokens(defs, text) {
       return _jsTokens.default
     }
-
     function shouldHighlight(options) {
       return _chalk.supportsColor || options.forceColor
     }
-
     function getChalk(options) {
       let chalk = _chalk
-
       if (options.forceColor) {
         chalk = new _chalk.constructor({
           enabled: true,
           level: 1,
         })
       }
-
       return chalk
     }
-
     function highlight(code, options = {}) {
       if (shouldHighlight(options)) {
         const chalk = getChalk(options)

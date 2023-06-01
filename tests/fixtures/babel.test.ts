@@ -68,22 +68,18 @@ test('babel', async () => {
     const DEFAULT_EXTENSIONS = Object.freeze(['.js', '.jsx', '.es6', '.es', '.mjs'])
     export { DEFAULT_EXTENSIONS }
     _exports.DEFAULT_EXTENSIONS = DEFAULT_EXTENSIONS
-
     class OptionManager {
       init(opts) {
         return _config.loadOptions(opts)
       }
     }
-
     export { OptionManager }
     _exports.OptionManager = OptionManager
-
     function Plugin(alias) {
       throw new Error(
         \`The (\${alias}) Babel 5 plugin is being run with an unsupported Babel version.\`,
       )
     }
-
     export { version } from '../package.json'
     export default _exports
     "

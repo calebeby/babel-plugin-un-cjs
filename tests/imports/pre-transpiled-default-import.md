@@ -18,7 +18,6 @@ to
 ```js
 import _bar from 'bar'
 console.log(_bar)
-
 _bar()
 ```
 
@@ -38,7 +37,6 @@ to
 ```js
 import _bar from 'bar'
 console.log(_bar)
-
 _bar()
 ```
 
@@ -70,7 +68,6 @@ to
 ```js
 import _bar from 'bar'
 console.log(_bar)
-
 _bar()
 ```
 
@@ -98,7 +95,6 @@ to
 ```js
 import _bar from 'bar'
 console.log(_bar)
-
 _bar()
 ```
 
@@ -164,7 +160,6 @@ to
 ```js
 import _asdf from 'hi'
 const asdf = 'hi'
-
 if (asdf) {
   console.log(_asdf)
 }

@@ -52,7 +52,6 @@ to
 
 ```js
 import 'side-effect'
-
 if (foo) {
 }
 ```
@@ -71,6 +70,5 @@ to
 ```js
 import 'other-module'
 import 'hi'
-
 const s = () => {}
 ```

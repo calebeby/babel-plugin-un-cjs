@@ -25,11 +25,9 @@ module.exports = toRegex;
   expect(transformed).toMatchInlineSnapshot(`
     "import extend from 'extend-shallow'
     import safe from 'safe-regex'
-
     function toRegex(pattern, options) {
       return new RegExp(toRegex.create(pattern, options))
     }
-
     export const create = function (pattern, options) {
       extend(foo, bar)
       safe(blah)

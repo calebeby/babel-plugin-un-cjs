@@ -112,6 +112,8 @@ to
 
 ```js
 import * as React from 'react'
+// TODO: add actual helpers here to make sure they get removed
+
 console.log(React.h, React.default)
 ```
 
@@ -162,7 +164,6 @@ to
 ```js
 import * as _foo from 'hi'
 const foo = 'dont override me'
-
 const main = () => {
   _foo.bar()
 }

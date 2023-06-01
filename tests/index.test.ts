@@ -32,9 +32,7 @@ module.exports.foobarbaz = 'foobarbaz'
       expect(transformed).toMatchInlineSnapshot(`
         "const foo = 'foo'
         _exports.foobar = 'foobar'
-
         const _foo = () => {}
-
         export { _foo as foo }
         let _exports = {
           foo: _foo,
@@ -98,7 +96,6 @@ module.exports = main
       const transformed = await transform(input)
       expect(transformed).toMatchInlineSnapshot(`
         "let main = () => {}
-
         export const other = 'hiiiii'
         main.other = other
         export default main

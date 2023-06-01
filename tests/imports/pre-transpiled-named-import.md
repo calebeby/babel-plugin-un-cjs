@@ -14,7 +14,6 @@ to
 ```js
 import * as _bar from 'bar'
 console.log(_bar.bar)
-
 _bar.bar()
 ```
 
@@ -42,7 +41,6 @@ to
 ```js
 import * as _bar from 'bar'
 console.log(_bar.bar)
-
 _bar.bar()
 ```
 

@@ -27,11 +27,9 @@ test('babel-types', async () => {
     export { Super as super }
     export { Super }
     _exports.super = _exports.Super = Super
-
     function Super(...args) {
       return _builder('Super', ...args)
     }
-
     export default _exports
     "
   `)

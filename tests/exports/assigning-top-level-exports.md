@@ -9,7 +9,6 @@ to
 
 ```js
 let _exports = function () {}
-
 console.log(_exports)
 export default _exports
 ```
@@ -24,7 +23,6 @@ to
 
 ```js
 let _exports = () => {}
-
 export default _exports
 ```
 
@@ -38,7 +36,6 @@ to
 
 ```js
 let _exports = class {}
-
 export default _exports
 ```
 
@@ -54,7 +51,6 @@ to
 
 ```js
 function eq(value, other) {}
-
 export default eq
 let _exports = eq
 ```
@@ -71,7 +67,6 @@ to
 
 ```js
 class eq {}
-
 export default eq
 let _exports = eq
 ```
