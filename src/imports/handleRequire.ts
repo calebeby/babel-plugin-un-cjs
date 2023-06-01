@@ -9,9 +9,12 @@ import {
   isModuleExports,
   isExports,
   isStillInTree,
+  toString,
 } from '../helpers'
 import { NamedExportsMap } from '..'
 import { isObjectDefinePropertyExport } from '../handlePotentialObjectDefineProperty'
+
+const functionPrototypeMethods = new Set(['apply', 'bind', 'call', 'toString'])
 
 export const handleRequire = (
   path: NodePath<t.CallExpression>,
@@ -145,6 +148,10 @@ export const handleRequire = (
   //    Special sub-case: the sub-properties are only referenced in exports:
   //      module.exports.asdf = foo.bar // or Object.defineProperty(exports, 'bar')
   //      -> Should output export { foo } from 'bar'
+  //    Special sub-case: The referenced properties are all members of Function.prototype,
+  //      e.g. const foo = require('bar'); foo.bind(window)
+  //      This suggests that foo is itself a function, not a namespace.
+  //      -> Should output import foo from 'bar'; foo.bind(window)
   // 2. Uses foo directly, and may additionally use properties (or foo is not used at all, directly or on a sub-property)
   //    -> import foo from 'bar'
   //    To ponder: Should a second import (namespace import) be created for the properties?
@@ -176,7 +183,7 @@ export const handleRequire = (
     }
   }
 
-  const usesDefaultOnly = references.every((ref) => {
+  const usesDefaultPropertyOnly = references.every((ref) => {
     const memberExp = ref.parent
     return (
       t.isMemberExpression(memberExp) &&
@@ -186,12 +193,19 @@ export const handleRequire = (
   })
 
   const useDefault =
-    usesDefaultOnly ||
-    references.some(
-      (ref) =>
-        // at least one of the references is foo directly instead of a property
-        !t.isMemberExpression(ref.parent),
-    )
+    usesDefaultPropertyOnly ||
+    // At least one of the references is foo directly instead of a property
+    references.some((ref) => !t.isMemberExpression(ref.parent)) ||
+    // Every reference is a property that is a method of function.prototype,
+    // suggesting that the imported value is itself a function, not a namespace
+    references.every((ref) => {
+      const memberExp = ref.parent
+      return (
+        t.isMemberExpression(memberExp) &&
+        t.isIdentifier(memberExp.property) &&
+        functionPrototypeMethods.has(memberExp.property.name)
+      )
+    })
 
   const newImport = t.importDeclaration(
     useDefault
@@ -200,7 +214,7 @@ export const handleRequire = (
     importString,
   )
   injectImportIntoBody(program, newImport)
-  if (usesDefaultOnly) {
+  if (usesDefaultPropertyOnly) {
     references.forEach((ref) => {
       const memberExp = ref.parentPath
       memberExp.replaceWith(localId)
@@ -210,36 +224,36 @@ export const handleRequire = (
     // Check for special case where references are only in exports like
     // module.exports.asdf = foo.bar // or Object.defineProperty(exports, 'bar')
 
-    if (
-      references.every((ref) => {
-        const parentCallExp = ref.findParent((p) =>
-          p.isCallExpression(),
-        ) as NodePath<t.CallExpression> | null
-        if (parentCallExp && isObjectDefinePropertyExport(parentCallExp))
-          return true
-        // foo.bar
-        const referenceMemberExp = ref.parentPath
-        if (!referenceMemberExp.isMemberExpression()) return false
-        // exports.asdf = foo.bar
-        const assignmentExp = referenceMemberExp.parentPath
-        if (!assignmentExp.isAssignmentExpression()) return false
-        // exports.asdf
-        const assignee = assignmentExp.get('left')
-        if (!assignee.isMemberExpression()) return false
-        // Make sure it is assigned on module.exports or exports
-        if (
-          !isExports(assignee.node.object) &&
-          !isModuleExports(assignee.node.object)
-        )
-          return false
-        // ex: console.log(exports.asdf = foo.bar)
-        // this is too complicated
-        // because we would need both an `import from` and `export from`
-        // so we are just falling through here
-        if (!assignmentExp.parentPath.isExpressionStatement()) return false
+    const onlyUsesPropertiesInExports = references.every((ref) => {
+      const parentCallExp = ref.findParent((p) =>
+        p.isCallExpression(),
+      ) as NodePath<t.CallExpression> | null
+      if (parentCallExp && isObjectDefinePropertyExport(parentCallExp))
         return true
-      })
-    ) {
+      // foo.bar
+      const referenceMemberExp = ref.parentPath
+      if (!referenceMemberExp.isMemberExpression()) return false
+      // exports.asdf = foo.bar
+      const assignmentExp = referenceMemberExp.parentPath
+      if (!assignmentExp.isAssignmentExpression()) return false
+      // exports.asdf
+      const assignee = assignmentExp.get('left')
+      if (!assignee.isMemberExpression()) return false
+      // Make sure it is assigned on module.exports or exports
+      if (
+        !isExports(assignee.node.object) &&
+        !isModuleExports(assignee.node.object)
+      )
+        return false
+      // ex: console.log(exports.asdf = foo.bar)
+      // this is too complicated
+      // because we would need both an `import from` and `export from`
+      // so we are just falling through here
+      if (!assignmentExp.parentPath.isExpressionStatement()) return false
+      return true
+    })
+
+    if (onlyUsesPropertiesInExports) {
       references.forEach((ref) => {
         // We know that each reference is either a direct assignment:
         // exports.asdf = foo.bar
@@ -292,7 +306,7 @@ export const handleRequire = (
       return
     }
 
-    // Not the special case
+    // Not the special case (therefore the imported binding is referenced directly)
     updateReferencesTo(references, localId)
   }
 }

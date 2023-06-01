@@ -15,6 +15,52 @@ myModule.foo()
 myModule.bar()
 ```
 
+# Special case: instance methods of `Function.prototype`
+
+`Function.prototype.call` suggests that the `bind` variable is itself a function, not a namespace with a `call` member. Same for other methods of Function.prototype:
+
+```js
+var bind = require('function-bind')
+
+bind.call(Function.call, Object.prototype.hasOwnProperty)
+bind.apply(null)
+bind.bind(window)
+bind.toString()
+```
+
+to
+
+```js
+import bind from 'function-bind'
+bind.call(Function.call, Object.prototype.hasOwnProperty)
+bind.apply(null)
+bind.bind(window)
+bind.toString()
+```
+
+As soon as we call a function that is _not_ a method of `Function.prototype`, we should interpret the `bind` variable as a namespace with those members instead.
+
+```js
+var bind = require('function-bind')
+
+bind.call(Function.call, Object.prototype.hasOwnProperty)
+bind.apply(null)
+bind.bind(window)
+bind.toString()
+bind.somethingElse()
+```
+
+to
+
+```js
+import * as bind from 'function-bind'
+bind.call(Function.call, Object.prototype.hasOwnProperty)
+bind.apply(null)
+bind.bind(window)
+bind.toString()
+bind.somethingElse()
+```
+
 # Creates namespace import even when require is in sub scope:
 
 ```js
