@@ -160,7 +160,7 @@ export const handleAssignmentExpression = (
     right.isBooleanLiteral() &&
     t.isIdentifier(left.node.object, { name: 'exports' }) &&
     t.isIdentifier(left.node.property, { name: '__esModule' }) &&
-    right.node.value === true
+    right.node.value
   )
     return path.remove()
 

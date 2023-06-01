@@ -34,11 +34,8 @@ export const handlePotentialLazyImportFunction = (
 
   if (statements.length !== 3) return
 
-  const [
-    importStatement,
-    funcReplacementStatement,
-    returnStatement,
-  ] = statements
+  const [importStatement, funcReplacementStatement, returnStatement] =
+    statements
 
   if (
     !importStatement.isVariableDeclaration() ||

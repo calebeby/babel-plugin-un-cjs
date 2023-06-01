@@ -102,6 +102,7 @@ export const writeExports = (
     ])
 
     const programBody = programPath.get('body')
+    // eslint-disable-next-line caleb/@typescript-eslint/no-unnecessary-condition
     if (!programBody[0]) return // program is empty, we don't need to do anything
     let newDeclarationPath: NodePath<t.Statement>
     if (directAssignmentsToExportObject.length === 1) {

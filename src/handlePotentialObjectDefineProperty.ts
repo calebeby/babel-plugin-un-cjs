@@ -65,7 +65,7 @@ export const isObjectDefinePropertyExport = (
         t.isIdentifier(prop.key) &&
         prop.key.name === 'value' &&
         t.isBooleanLiteral(prop.value) &&
-        prop.value.value === true
+        prop.value.value
       )
     )
       return false

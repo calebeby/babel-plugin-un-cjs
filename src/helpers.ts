@@ -146,6 +146,6 @@ export const isValidIdentiferName = (name: string) => {
 }
 
 export const toString = (input: NodePath | t.Node) => {
-  const node = (input as NodePath).node || input
+  const node = 'node' in input ? input.node : input
   return generate(node).code
 }
