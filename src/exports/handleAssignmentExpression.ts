@@ -19,7 +19,7 @@ const getNamedExportsFromReferencedAssignments = (
     // idk if this will ever be false... but type narrowing
     if (!refPath.isIdentifier()) return
     const memExp = refPath.parentPath
-    const assignment = memExp.parentPath
+    const assignment = memExp.parentPath!
     // find direct member assignments in the top level
     // obj.foo = bar
     if (
@@ -158,9 +158,8 @@ export const handleAssignmentExpression = (
   if (
     left.isMemberExpression() &&
     right.isBooleanLiteral() &&
-    t.isIdentifier(left.node.object) &&
-    left.node.object.name === 'exports' &&
-    left.node.property.name === '__esModule' &&
+    t.isIdentifier(left.node.object, { name: 'exports' }) &&
+    t.isIdentifier(left.node.property, { name: '__esModule' }) &&
     right.node.value === true
   )
     return path.remove()

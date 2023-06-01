@@ -6,6 +6,7 @@
   "rules": {
     "caleb/unicorn/filename-case": "off",
     "complexity": "off",
-    "array-callback-return": "off"
+    "array-callback-return": "off",
+    "caleb/@typescript-eslint/no-non-null-assertion": "off"
   }
 }

@@ -22,7 +22,7 @@ export const handlePotentialLazyImportFunction = (
   if (!binding) return
   // If the function is referenced in a way that is different from `foo().bar`, then we bail
   const hasInvalidReference = binding.referencePaths.some((ref) => {
-    const parent = ref.parentPath
+    const parent = ref.parentPath!
     if (!parent.isCallExpression()) return true
     const grandparent = parent.parentPath
     if (!grandparent.isMemberExpression()) return true
@@ -95,10 +95,9 @@ export const handlePotentialLazyImportFunction = (
 
   // Replace all instances of _parser().foo with newId.foo
   binding.referencePaths.forEach((ref) => {
-    const parent = ref.parentPath
+    const parent = ref.parentPath!
     if (!parent.isCallExpression()) return
     parent.replaceWith(newId)
-    // @ts-expect-error
     newBinding.reference(parent)
   })
 }

@@ -33,7 +33,7 @@ export const handleDefaultImport = (path: NodePath<t.CallExpression>) => {
   // Replace foo.default with foo
   // Replace foo with { default: foo }
   references.forEach((ref) => {
-    if (ref.parentPath.isMemberExpression()) {
+    if (ref.parentPath!.isMemberExpression()) {
       const memberExpression = ref.parentPath
       if (
         !t.isIdentifier(memberExpression.node.property) ||

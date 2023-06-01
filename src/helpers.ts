@@ -58,7 +58,7 @@ export const assignMaps = <Key, Val>(
  * From a descendent, go up until you hit a direct child of the program path
  */
 export const findParentProgramChild = (path: NodePath) =>
-  path.find((p) => p.parentPath.isProgram())
+  path.find((p) => p.parentPath!.isProgram())!
 
 export const everyParent = (
   path: NodePath,
@@ -66,7 +66,7 @@ export const everyParent = (
 ): boolean => {
   if (condition(path)) {
     if (path.isProgram()) return true
-    return everyParent(path.parentPath, condition)
+    return everyParent(path.parentPath!, condition)
   }
   return false
 }
@@ -116,10 +116,7 @@ export const updateReferencesTo = (
     // isReferencedIdentifier will be true for both Identifiers and JSXIdentifiers
     if (!p.isReferencedIdentifier()) return
     p.node.name = newId.name
-    p.scope
-      .getBinding(newId.name)
-      // @ts-expect-error
-      ?.reference(p)
+    p.scope.getBinding(newId.name)?.reference(p)
   })
 }
 

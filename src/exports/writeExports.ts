@@ -115,9 +115,7 @@ export const writeExports = (
       // This is not actually an expressionStatement anymore, now it is a variableDeclaration
       newDeclarationPath = expressionStatement
     } else {
-      newDeclarationPath = programBody[0].insertBefore(
-        newDeclaration,
-      )[0] as NodePath<typeof newDeclaration>
+      newDeclarationPath = programBody[0].insertBefore(newDeclaration)[0]
     }
     // If it was module.exports = foo, it will be handled within the loop through namedExports
     // If it was module.exports = () => {} or another non-identifier, it will be handled here.
@@ -185,9 +183,7 @@ export const writeExports = (
           [],
         )
 
-        const newPath = programChild.insertBefore(
-          exportDeclaration,
-        )[0] as NodePath<typeof exportDeclaration>
+        const newPath = programChild.insertBefore(exportDeclaration)[0]
         newPath.scope.registerDeclaration(newPath)
         value.replaceWith(newId)
       } else {
@@ -203,7 +199,7 @@ export const writeExports = (
         const newPath = programChild.insertBefore([
           varDeclaration,
           exportDeclaration,
-        ])[1] as NodePath<typeof exportDeclaration>
+        ])[1]
         newPath.scope.registerDeclaration(newPath)
         value.replaceWith(newId)
       }

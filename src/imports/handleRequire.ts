@@ -9,7 +9,6 @@ import {
   isModuleExports,
   isExports,
   isStillInTree,
-  toString,
 } from '../helpers'
 import { NamedExportsMap } from '..'
 import { isObjectDefinePropertyExport } from '../handlePotentialObjectDefineProperty'
@@ -172,7 +171,7 @@ export const handleRequire = (
   // Special case: check for if the only reference is module.exports = imported
   if (references.length === 1) {
     const ref = references[0]
-    const assignment = ref.parentPath
+    const assignment = ref.parentPath!
     if (
       assignment.isAssignmentExpression() &&
       isModuleExports(assignment.node.left)
@@ -216,7 +215,7 @@ export const handleRequire = (
   injectImportIntoBody(program, newImport)
   if (usesDefaultPropertyOnly) {
     references.forEach((ref) => {
-      const memberExp = ref.parentPath
+      const memberExp = ref.parentPath!
       memberExp.replaceWith(localId)
     })
   } else {
@@ -231,7 +230,7 @@ export const handleRequire = (
       if (parentCallExp && isObjectDefinePropertyExport(parentCallExp))
         return true
       // foo.bar
-      const referenceMemberExp = ref.parentPath
+      const referenceMemberExp = ref.parentPath!
       if (!referenceMemberExp.isMemberExpression()) return false
       // exports.asdf = foo.bar
       const assignmentExp = referenceMemberExp.parentPath
@@ -261,20 +260,33 @@ export const handleRequire = (
         // Object.defineProperty(exports, 'asdf', { ... })
 
         // in the case of Object.defineProperty, this is not an assignment expression
-        const assignmentExp = ref.parentPath.parentPath
+        const assignmentExp = ref.parentPath!.parentPath!
 
         const programPath = getProgramPath(assignmentExp)
+        if (
+          !t.isMemberExpression(ref.parent) ||
+          !t.isIdentifier(ref.parent.property)
+        )
+          return
 
         // bar
-        const importedId: t.Identifier = (ref.parent as t.MemberExpression)
-          .property
+        const importedId: t.Identifier = ref.parent.property
         // asdf
         let exportedId: t.Identifier
 
         if (assignmentExp.isAssignmentExpression()) {
+          if (
+            !t.isMemberExpression(assignmentExp.node.left) ||
+            !t.isIdentifier(assignmentExp.node.left.property)
+          ) {
+            // Ex: private field? exports.#asdf = foo.bar
+            // We can ignore that. (it doesn't make sense anyways)
+            return
+          }
+
           // case: exports.asdf = foo.bar
           // asdf
-          exportedId = (assignmentExp.node.left as t.MemberExpression).property
+          exportedId = assignmentExp.node.left.property
           assignmentExp.parentPath.remove()
         } else {
           const parentCallExp = ref.findParent((p) =>
